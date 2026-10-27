@@ -98,7 +98,6 @@ label.sw{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:.9
   <div id="guard" class="guard" role="alertdialog" aria-label="Leave timed quiz" hidden></div>
   <div id="app"></div>
   <details id="trendbox" class="card" hidden><summary>Your scores and times</summary><div id="trend"></div></details>
-  <p class="foot" id="foot"></p>
 </main>
 
 <script>
@@ -418,7 +417,6 @@ function ready(){
 }
 function render(){
   const bank = BANKS[course], total = order.length;
-  $("foot").textContent = bank.title;
   if (phase === "ready") return ready();
   if (i >= total) return done();
   const q = bank.qs[order[i]], L = "ABCDE";
