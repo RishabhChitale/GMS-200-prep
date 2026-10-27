@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Midterm Drill</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one narrow column. Course switch on top, progress bar, one question card, feedback under the options. */
+:root{
+  --bg:#f3f5f9; --surface:#ffffff; --fg:#14213a; --muted:#5b6780; --line:#d5dbe7;
+  --accent:#1f4fd8; --timec:#a15c00; --accent-fg:#ffffff; --good:#17794a; --good-bg:#e1f4ea; --bad:#b3261e; --bad-bg:#fbe5e3;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1626; --surface:#18213a; --fg:#e6ebf7; --muted:#9aa7c4; --line:#2c3857;
+  --accent:#7b9bff; --timec:#f0b45a; --accent-fg:#0f1626; --good:#5fd39a; --good-bg:#14352a; --bad:#ff8f86; --bad-bg:#40201f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1626; --surface:#18213a; --fg:#e6ebf7; --muted:#9aa7c4; --line:#2c3857;
+  --accent:#7b9bff; --timec:#f0b45a; --accent-fg:#0f1626; --good:#5fd39a; --good-bg:#14352a; --bad:#ff8f86; --bad-bg:#40201f; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:16px/1.5 var(--sans);padding-block:20px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1{font-size:1.35rem;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.sub{color:var(--muted);font-size:.9rem;margin:2px 0 0}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.tab{padding:8px 14px;border:1px solid var(--line);background:var(--surface);border-radius:8px;font-weight:500}
+.chip{padding:5px 10px;font-size:.85rem}
+.tab[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.meta{display:flex;justify-content:space-between;gap:12px;font:500 .8rem var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .25s}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.tag{font:500 .75rem var(--mono);color:var(--accent);text-transform:uppercase;letter-spacing:.08em}
+.q{font-size:1.1rem;font-weight:500;margin:0;text-wrap:pretty}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{text-align:left;padding:11px 14px;border:1px solid var(--line);background:var(--bg);border-radius:8px;display:flex;gap:12px;align-items:baseline;min-width:0}
+.opt b{font:500 .85rem var(--mono);color:var(--muted);flex:none}
+.opt span{min-width:0;overflow-wrap:anywhere}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt.right{background:var(--good-bg);border-color:var(--good)}
+.opt.wrong{background:var(--bad-bg);border-color:var(--bad)}
+.opt:disabled{cursor:default}
+.fb{padding:12px 14px;border-radius:8px;font-size:.95rem;overflow-wrap:anywhere}
+.fb.ok{background:var(--good-bg)} .fb.no{background:var(--bad-bg)}
+.fb strong{display:block;margin-bottom:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{padding:10px 18px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-fg);font-weight:600}
+.btn.ghost{background:transparent;color:var(--fg);border-color:var(--line)}
+label.sw{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:.9rem}
+.score{font:600 2.6rem var(--mono);margin:0}
+.missed{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.missed li{border-top:1px solid var(--line);padding-top:10px;font-size:.92rem;overflow-wrap:anywhere}
+.missed em{color:var(--good);font-style:normal;font-weight:600}
+.opt.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.clock{font:600 1rem var(--mono);color:var(--fg);text-transform:none;letter-spacing:0}
+.clock.low{color:var(--bad)}
+#trendbox{display:block}
+#trendbox>summary{cursor:pointer;font-weight:600;font-size:1.05rem}
+#trend{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+.th{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.th h2{font-size:1.05rem;margin:0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px}
+.stats div{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
+.stats b{font:600 1.3rem var(--mono)} .stats span{color:var(--muted);font-size:.78rem}
+.fig{margin:0;display:flex;flex-direction:column;gap:4px}
+.fig figcaption{font-size:.85rem;color:var(--muted);font-weight:500}
+.cw{position:relative;touch-action:pan-y}
+.cw svg{width:100%;height:auto;display:block;overflow:visible}
+.gl{stroke:var(--line);stroke-width:1} .xh{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3}
+.ax{fill:var(--muted);font:11px var(--mono)}
+.tip{position:absolute;top:0;z-index:2;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:.78rem;line-height:1.4;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.18);width:max-content;max-width:min(260px,90%)}
+.tw{overflow-x:auto} table{border-collapse:collapse;font-size:.82rem;width:100%} th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);white-space:nowrap} th{color:var(--muted);font-weight:500}
+.guard{border:1px solid var(--bad);background:var(--bad-bg);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.why{margin:10px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;font-size:.88rem}
+.why li{padding:2px 0 2px 10px;border-left:3px solid var(--line)}
+.why li.r{border-left-color:var(--good)} .why li.w{border-left-color:var(--bad)}
+.why b{font:500 .8rem var(--mono);margin-right:4px}
+.foot{color:var(--muted);font-size:.8rem}
+</style>
+
+</head>
+<body>
+<main>
+  <div>
+    <h1>Midterm Drill</h1>
+    <p class="sub">Pick a set, optionally narrow to one chapter, and see the reason right away. "Slides &amp; notes" is written by me from your lecture slides and the full chapter text. "Book self-tests" is the textbook's own end-of-chapter questions with the publisher's answers. MTH131 is written from the slides and posted sample exam. None are real test questions.</p>
+  </div>
+  <div class="tabs" id="tabs" role="group" aria-label="Quiz set"></div>
+  <div class="tabs" id="chaps" role="group" aria-label="Chapter" hidden></div>
+  <div class="tabs" id="modes" role="group" aria-label="Mode"></div>
+  <div class="tabs" id="sizes" role="group" aria-label="Timed quiz length" hidden></div>
+  <div class="row">
+    <label class="sw" for="shuf" id="shufl"><input type="checkbox" id="shuf" checked> Shuffle questions</label>
+    <label class="sw" for="rnd" id="rndl" hidden><input type="checkbox" id="rnd" checked> Randomize the 70 each attempt (off = the same 70 every time)</label>
+    <button class="btn ghost" id="restart" type="button">Restart</button>
+  </div>
+  <div id="guard" class="guard" role="alertdialog" aria-label="Leave timed quiz" hidden></div>
+  <div id="app"></div>
+  <details id="trendbox" class="card" hidden><summary>Your scores and times</summary><div id="trend"></div></details>
+  <p class="foot" id="foot"></p>
+</main>
+
+<script>
+const T = (ch, n, stem, opts, a, note) => [stem, opts, "abcd".indexOf(a), "Textbook Ch " + ch + " self-test Q" + n + "." + (note ? " " + note : "")];
+const X = (stem, opts, a, note) => [stem, opts, a, note];
+let bn = 0;
+const B = (stem, opts, a, note) => { const k = (bn++ * 3 + 1) % opts.length; const r = opts.slice(k).concat(opts.slice(0, k)); return [stem, r, (a - k + opts.length) % opts.length, "From the chapter body. " + (note || "")]; };
+const BANKS = {
+  GMS200: {
+    title: "GMS200 · Ch 1, 7, 2, 8, 5 · 70 MC/TF, 60 min",
+    qs: [
+["Which is an OUTPUT measure of goal accomplishment?",["Performance efficiency","Performance effectiveness","Productivity","Social capital"],1,"Effectiveness = output (was the goal hit). Efficiency = input (what did it cost)."],
+["A manager responsible for a single area such as finance is a:",["Line manager","General manager","Functional manager","Administrator"],2,"Functional managers handle one area. General managers span many."],
+["Mintzberg's managerial roles fall into which three groups?",["Technical, human, conceptual","Interpersonal, informational, decisional","Planning, leading, controlling","Top, middle, supervisory"],1,"Technical/human/conceptual are Katz's skills."],
+["Which is NOT a characteristic of useful information?",["Timely","Complete","Understandable","Inexpensive"],3,"Useful information is timely, high quality, complete, relevant, understandable."],
+["A manager who proactively anticipates problems and opportunities is a problem:",["Avoider","Solver","Seeker","Satisficer"],2,"Seekers are proactive, solvers reactive, avoiders inactive."],
+["Applying a readily available past solution to a familiar problem is a:",["Non-programmed decision","Programmed decision","Crisis decision","Risk decision"],1,"Structured problem leads to a programmed decision."],
+["You know the probabilities of outcomes but not the outcomes for certain. This is a ___ environment.",["Certain","Risk","Uncertain","Crisis"],1,"Risk: probabilities known. Uncertain: probabilities hard to assign."],
+["Choosing the first alternative that is 'good enough' is called:",["Optimizing","Satisficing","Benchmarking","Framing"],1,"The behavioural model leads to satisficing. The classical model optimizes."],
+["Continuing a project because of past spending, even though it is failing, is:",["Availability bias","Anchoring","Escalating commitment","Framing error"],2,"Escalating commitment: continuing a course of action that is not working."],
+["Deciding based on the most recent news story is:",["Availability bias","Representativeness bias","Confirmation error","Anchoring"],0,"Availability bias bases a decision on recent information or events."],
+["Frederick Taylor is best known for:",["Bureaucracy","Scientific management","Theory Y","Hawthorne studies"],1,"Taylor is the father of scientific management."],
+["Which Fayol duty makes sure things go according to plan, with corrective action?",["Foresight","Command","Coordination","Control"],3,"Fayol: foresight, organization, command, coordination, control."],
+["Which is NOT a characteristic of Weber's bureaucracy?",["Clear hierarchy","Formal rules","Careers based on merit","Personal relationships over rules"],3,"Bureaucracy is characterized by impersonality."],
+["The Hawthorne studies concluded that:",["Pay is the only motivator","Social and human factors drive productivity","Lighting is the key factor","Workers prefer strict control"],1,"Social setting and human relations raised productivity."],
+["Which McGregor assumption belongs to Theory Y?",["Workers resist change","Workers prefer to be led","Workers are capable of self-direction","Workers dislike work"],2,"The other three are Theory X."],
+["Maslow's progression principle says:",["A satisfied need no longer motivates","A need motivates once the lower need is satisfied","All needs motivate at once","Self-actualization is satisfied first"],1,"The first option is the deficit principle."],
+["'No one best way to manage; it depends on the situation' describes:",["Contingency thinking","TQM","Scientific management","Evidence-based management"],0,"That is contingency thinking."],
+["Plans that look three or more years ahead are:",["Short-term","Operational","Long-term","Functional"],2,"Long-term is 3+ years. Short-term is one year or less."],
+["A single-use plan that commits resources to a project is a:",["Policy","Procedure","Budget","Scenario"],2,"Budgets are single-use plans. Policies and procedures are standing."],
+["A long-term version of contingency planning that builds plans for alternative futures is:",["Benchmarking","Forecasting","Scenario planning","MBO"],2,"Scenario planning."],
+["A franchise is an example of a:",["Wholly owned subsidiary","Market entry strategy","Joint venture","Transnational corporation"],1,"Licensing and franchising are market entry. Alliances, joint ventures and subsidiaries are FDI."],
+["A local operation completely owned by a foreign firm is a:",["Joint venture","Strategic alliance","Licensing agreement","Wholly owned subsidiary"],3,"Wholly owned subsidiary."],
+["A firm operating worldwide on a borderless basis with no single national home is a:",["Domestic firm","Transnational corporation","Franchisee","Exporter"],1,"Transnational corporation."],
+["Which Canadian law prohibits bribing foreign officials?",["NAFTA","CFPOA","APEC","WTO"],1,"Corruption of Foreign Public Officials Act."],
+["Canada is classified as a ___ context and ___ culture.",["High; polychronic","Low; monochronic","High; monochronic","Low; polychronic"],1,"Canada: low context, monochronic."],
+["True or false: Productivity compares outputs to the resources (inputs) used.",["True","False"],0,"Productivity = outputs relative to inputs."],
+["True or false: Data and information mean the same thing.",["True","False"],1,"Data = raw facts. Information = data made useful."],
+["True or false: Managers should always use systematic thinking and avoid intuition.",["True","False"],1,"Multi-dimensional thinking uses both."],
+["True or false: In the classical decision model, managers make optimizing decisions.",["True","False"],0,"Classical = optimizing. Behavioural = satisficing."],
+["True or false: Anchoring bias means giving too much weight to the most recent information.",["True","False"],1,"That is availability bias. Anchoring is adjusting from a prior reference point."],
+["True or false: Taylor's scientific management included carefully selecting and training workers.",["True","False"],0,"Select, train with incentives, support, and build a 'science' for each job."],
+["True or false: Theory X managers assume workers are creative and self-directed.",["True","False"],1,"That is Theory Y."],
+["True or false: Contingency plans include trigger points that signal when to activate alternatives.",["True","False"],0,"Yes, trigger points."],
+["True or false: Operational plans are the broadest plans covering the whole organization.",["True","False"],1,"Those are strategic plans."],
+["True or false: Importing is the opposite of exporting.",["True","False"],0,"Exporting sells local products abroad. Importing buys foreign products."],
+["True or false: Joint ventures involve co-ownership by foreign and local partners.",["True","False"],0,"Yes."],
+["True or false: Culture shock is the tendency to see one's own culture as superior.",["True","False"],1,"That is ethnocentrism. Culture shock is confusion and discomfort."],
+["True or false: In adjusting to a new culture, 'the honeymoon' comes before 'irritation and anger'.",["True","False"],0,"Order: confusion, small victories, honeymoon, irritation and anger, reality."],
+["True or false: Political risk is the potential loss of a foreign investment due to instability in the host country.",["True","False"],0,"Yes."]
+    ]
+  },
+  "GMS200 Textbook": {
+    title: "GMS200 · Management, 5th Canadian ed. · end-of-chapter self-tests, Ch 1, 7, 2, 8, 5",
+    qs: [
+T(1,1,"The process of management involves the functions of planning, ____, leading, and controlling.",["accounting","creating","innovating","organizing"],"d"),
+T(1,2,"An effective manager achieves both high-performance results and high levels of ____ among people doing the required work.",["turnover","effectiveness","satisfaction","stress"],"c"),
+T(1,3,"Performance efficiency is a measure of the ____ associated with task accomplishment.",["resource costs","goal specificity","product quality","product quantity"],"a","Efficiency is an input measure of resource cost."),
+T(1,4,"The requirement that a manager answer to a higher-level boss for the performance results of a work team is called ____.",["dependency","accountability","authority","empowerment"],"b"),
+T(1,5,"Productivity is a measure of the quantity and ____ of work produced, relative to the cost of inputs.",["quality","cost","timeliness","value"],"a"),
+T(1,6,"____ managers pay special attention to the external environment, looking for problems and opportunities.",["Top","Middle","Lower","First-line"],"a"),
+T(1,7,"The accounting manager for a local newspaper is a ____ manager, whereas the editorial director for sports is a ____ manager.",["general, functional","middle, top","staff, line","senior, junior"],"c","Staff managers advise using technical expertise. Line managers directly produce the goods or services."),
+T(1,8,"A team leader who clarifies work targets and deadlines for members is fulfilling the management function of ____.",["planning","delegating","controlling","supervising"],"a"),
+T(1,9,"Building and maintaining good relationships with people who may help implement a manager's agendas is called ____.",["governance","networking","authority","entrepreneurship"],"b"),
+T(1,10,"In Katz's framework, top managers rely more on their ____ skills than first-line managers do.",["human","conceptual","decision-making","technical"],"b","Conceptual skills grow in importance at higher levels, technical at lower levels, human at all levels."),
+T(1,11,"The research of Mintzberg and others concludes that managers ____.",["work at a leisurely pace","have blocks of private time for planning","are never free from the pressures of performance responsibility","have the advantages of flexible work hours"],"c"),
+T(1,13,"Trends in the new workplace include which of the following?",["More emphasis by managers on giving orders","More attention by organizations to valuing people as human assets","Less teamwork","Less concern for work-life balance among new workers"],"b"),
+T(1,14,"In the 'upside-down pyramid' view, the manager's role is providing ____ so that workers can directly serve ____.",["direction, top management","leadership, organizational goals","support, customers","agendas, networking"],"c"),
+T(1,15,"A retail manager measures daily sales in women's apparel and compares them with daily targets. This is the management function of ____.",["planning","agenda setting","controlling","delegating"],"c"),
+X("Which is an INTERPERSONAL role in Mintzberg's framework?",["Monitor","Figurehead","Entrepreneur","Negotiator"],1,"Interpersonal: figurehead, leader, liaison. Informational: monitor, disseminator, spokesperson. Decisional: entrepreneur, disturbance handler, resource allocator, negotiator."),
+X("Which is an INFORMATIONAL role?",["Leader","Liaison","Spokesperson","Resource allocator"],2,"Informational: monitor, disseminator, spokesperson."),
+X("Which is NOT a decisional role?",["Entrepreneur","Disturbance handler","Resource allocator","Liaison"],3,"Liaison is interpersonal."),
+T(2,1,"The assumption that people are complex with widely varying needs is most associated with the ____ management approaches.",["classical","neoclassical","behavioural","modern"],"c"),
+T(2,2,"The father of scientific management is ____.",["Weber","Taylor","Mintzberg","Katz"],"b"),
+T(2,3,"A university registrar deals with students by ID number rather than name. Which bureaucratic characteristic is shown, and what is its intended benefit?",["division of labour, competency","merit-based careers, productivity","rules and procedures, efficiency","impersonality, fairness"],"d"),
+T(2,4,"If an organization was performing poorly and Henri Fayol were called in, what would he most likely suggest?",["Teach managers to better plan and control","Teach workers more efficient job methods","Promote to management only the most competent workers","Find ways to increase corporate social responsibility"],"a"),
+T(2,5,"One example of scientific management principles applied today is:",["conducting studies to increase efficiencies in job performance","finding alternatives to a bureaucratic structure","training managers to better understand worker attitudes","focusing managers on teamwork rather than individual jobs"],"a"),
+T(2,6,"The Hawthorne studies raised awareness of how ____ can be important influences on productivity.",["structures","human factors","physical work conditions","pay and rewards"],"b"),
+T(2,7,"Advice to study a job, train workers carefully, and link financial incentives to job performance would most likely come from ____.",["scientific management","contingency management","Henri Fayol","Abraham Maslow"],"a"),
+T(2,8,"The highest level in Maslow's hierarchy includes ____ needs.",["safety","esteem","self-actualization","physiological"],"c"),
+T(2,9,"Which theorist would most agree with 'If you treat people as grown-ups they will perform that way'?",["Argyris","Deming","Weber","Fuller"],"a"),
+T(2,10,"When people perform in a situation as they are expected to, this is sometimes called the ____ Effect.",["Hawthorne","systems","contingency","open-systems"],"a"),
+T(2,11,"Resource acquisition and customer satisfaction are important when an organization is viewed as a(n) ____.",["bureaucracy","closed system","open system","pyramid"],"c"),
+T(2,12,"The loan-processing department of your local bank would be considered a ____ of the bank.",["subsystem","closed system","resource input","cost centre"],"a"),
+T(2,13,"A manager notices Sheryl has strong social needs and assigns her to customer relations, and gives Farhad lots of praise for his strong ego needs. This displays ____.",["systems thinking","Theory X","motion study","contingency thinking"],"d"),
+T(2,14,"Which is the correct match?",["Follett: analytics","McGregor: motion study","Deming: quality management","Maslow: Theory X and Y"],"c"),
+T(2,15,"Avoiding hearsay and deciding on solid facts and information is known as ____.",["continuous improvement","evidence-based management","TQM","Theory X management"],"b"),
+T(5,1,"Reasons businesses go international include gaining new markets, finding investment capital, and reducing ____.",["political risk","protectionism","labour costs","most favoured nation status"],"c"),
+T(5,2,"Rocky Brands bought full ownership of a manufacturing company in the Dominican Republic. This is a:",["import/export","licensing","foreign subsidiary","joint venture"],"c"),
+T(5,3,"Which form of international business is a direct investment strategy?",["exporting","joint venture","licensing","global sourcing"],"b"),
+T(5,4,"The World Trade Organization would most likely become involved in disputes between countries over ____.",["exchange rates","ethnocentrism","nationalization","tariffs"],"d"),
+T(5,5,"Business complaints about copyright and intellectual property protection illustrate differences in ____.",["legal environments","political stability","sustainable development","economic systems"],"a"),
+T(5,6,"In ____ cultures members tend to do one thing at a time; in ____ cultures members do many things at once.",["monochronic, polychronic","polycentric, geocentric","collectivist, individualist","neutral, affective"],"a"),
+T(5,7,"Hall describes a culture that places great value on expressing meaning in written or spoken words as ____.",["monochronic","proxemic","collectivist","low-context"],"d"),
+T(5,8,"Malaysian culture values teamwork and great respect for authority. Hofstede would describe it as high in both ____.",["uncertainty avoidance and feminism","universalism and particularism","collectivism and power distance","long-term orientation and masculinity"],"c"),
+T(5,9,"In Hofstede's study, Canada was one of the most ____ compared with other countries.",["individualistic","collectivist","feminine","long-term oriented"],"a"),
+T(5,10,"A foreign visitor takes offence at a local custom, considering it inferior to their own. This is ____.",["universalist","prescriptive","monochronic","ethnocentric"],"d"),
+T(5,11,"A company buys cotton in Egypt, has tops sewn in Sri Lanka from designs made in Italy, and sells them in the US. This is ____.",["licensing","importing","joint venturing","global sourcing"],"d"),
+T(5,12,"The difference between an international business and a transnational corporation is that the transnational ____.",["tries to operate around the world without a strong national identity","does business in only one or two foreign countries","is led by ethnocentric managers","is based outside North America"],"a"),
+T(5,13,"The Corruption of Foreign Public Officials Act makes it illegal for ____.",["Canadians to engage in joint ventures abroad","foreign businesses to pay bribes to Canadian officials","Canadian businesses to make payoffs abroad to gain contracts","foreign businesses to steal intellectual property from Canadian firms"],"c"),
+T(5,14,"A team member hesitant to speak up, who defers to the leader and avoids accepting individual praise, shows traits consistent with a ____ culture.",["monochronic","low-context","tight","loose"],"c"),
+T(5,15,"Hofstede would describe a culture whose members respect age and authority and defer to supervisors as ____.",["low masculinity","high particularism","high power distance","monochronic"],"c"),
+X("Which is a foundation of intercultural competency?",["Perception management","Risk management","Quality management","Time management"],0,"The three foundations are perception management, relationship management, and self-management."),
+T(7,1,"Among the ways information technology is changing organizations, ____ is one of its most noteworthy characteristics.",["eliminating need for top managers","reducing information available for decisions","breaking down barriers internally and externally","decreasing need for environmental awareness"],"c"),
+T(7,2,"MIS collect, organize and distribute data. ____ taps the available data to extract and report it in organized ways most useful to decision-makers.",["Analytics","Business intelligence","Anchoring and adjustment","Optimizing"],"b"),
+T(7,3,"A manager who is reactive and works hard to address problems after they occur is a ____.",["problem seeker","problem avoider","problem solver","problem manager"],"c"),
+T(7,4,"A(n) ____ thinker approaches problems in a rational and analytic fashion.",["systematic","intuitive","internal","external"],"a"),
+T(7,5,"A person likes hard facts and clear goals, wants control, and keeps things impersonal. Their cognitive style leans toward ____.",["sensation thinking","intuitive thinking","sensation feeling","intuitive feeling"],"a"),
+T(7,6,"Assigning probabilities to action alternatives and their consequences indicates ____ in the decision environment.",["certainty","optimizing","risk","satisficing"],"c"),
+T(7,7,"The first step in the decision-making process is to ____.",["identify alternatives","evaluate results","find and define the problem","choose a solution"],"c"),
+T(7,8,"Developing a plan to increase international sales is an example of a(n) ____ problem.",["routine","unstructured","crisis","structured"],"b"),
+T(7,9,"Costs, timeliness, and ____ are among the criteria for evaluating alternative courses of action.",["ethical soundness","competitiveness","availability","simplicity"],"a","Criteria: benefits, costs, timeliness, acceptability, ethical soundness."),
+T(7,10,"A common mistake managers make in crisis situations is that they ____.",["try to get too much information before responding","rely too much on group decision-making","isolate themselves to make the decision alone","forget to use their crisis management plan"],"c"),
+T(7,11,"The ____ decision model sees managers making optimizing decisions; the ____ model sees them making satisficing decisions.",["behavioural, human relations","classical, behavioural","heuristic, humanistic","quantitative, behavioural"],"b"),
+T(7,12,"A manager decides a raise only after looking at the person's current salary. The risk is bias from ____.",["a framing error","escalating commitment","anchoring and adjustment","strategic opportunism"],"c"),
+T(7,13,"Addressing a problem according to the positive or negative context in which it is presented is ____.",["framing error","escalating commitment","availability and adjustment","strategic opportunism"],"a"),
+T(7,14,"Continuing a course of action that facts indicate is failing is called ____.",["strategic opportunism","escalating commitment","confirmation error","the risky shift"],"b"),
+T(7,15,"Personal creativity drivers include creativity skills, task expertise, and ____.",["emotional intelligence","management support","organizational culture","task motivation"],"d"),
+X("Which is a SITUATIONAL creativity driver?",["Task expertise","Group creativity skills","Individual creativity skills","Task motivation"],1,"Situational drivers: group creativity skills, management support, organizational culture. Personal drivers: individual creativity skills, task expertise, task motivation."),
+X("In the decision-making chapter, which set are the ETHICS CRITERIA questions?",["Utility, rights, justice, caring","Family, community, role models, peers","Benefits, costs, timeliness, acceptability","Technical, human, conceptual, ethical"],0,"The book calls utility/rights/justice/caring the ethics criteria. Its 'spotlight questions' ask how the decision looks to family, community members and ethical role models. Your slides label the four criteria 'spotlight questions', so know both labels."),
+T(8,1,"Planning is the process of ____ and ____.",["developing premises about the future, evaluating them","measuring results, taking corrective action","measuring past performance, targeting future performance","setting objectives, deciding how to accomplish them"],"d"),
+T(8,2,"The benefits of planning include ____.",["improved focus","lower labour costs","more accurate forecasts","higher profits"],"a"),
+T(8,3,"To help implement its corporate strategy, a firm develops a ____ plan for the marketing department.",["functional","single-use","production","zero-based"],"a"),
+T(8,4,"____ planning identifies alternative courses of action to take if and when certain situations arise.",["Zero-based","Participative","Strategic","Contingency"],"d"),
+T(8,5,"The first step in the control process is to ____.",["measure actual performance","establish objectives and standards","compare results with objectives","take corrective action"],"b"),
+T(8,6,"A sexual harassment policy is an example of ____ plans.",["long-term","single-use","standing-use","operational"],"c","Policies and procedures are standing plans. Budgets are single-use."),
+T(8,7,"Justifying a new budget on projected activities rather than past practice is ____ budgeting.",["zero-based","variable","fixed","contingency"],"a"),
+T(8,8,"One benefit of participatory planning is ____.",["reduced time for planning","less need for forecasting","greater attention to contingencies","more commitment to implementation"],"d"),
+T(8,9,"In a hierarchy of objectives, lower-level plans become the ____ for accomplishing higher-level plans.",["means","ends","scenarios","benchmarks"],"a"),
+T(8,10,"When managers use benchmarking, they ____.",["use flexible budgets","identify best practices used by others","seek the most accurate forecasts available","focus more on the short term than the long term"],"b"),
+T(8,11,"A problem with relying too much on staff planners is ____.",["a communication gap between planners and implementers","lack of expertise in the planning process","short-term rather than long-term focus","neglect of budgets"],"a"),
+T(8,12,"The planning process isn't complete until ____.",["future conditions have been identified","stretch goals have been set","plans are implemented and results evaluated","budgets commit resources to plans"],"c"),
+T(8,13,"Under management by objectives, who should set a team member's performance objectives?",["The team member","The team leader","The team leader and team member","The team member, the team leader, and a lawyer"],"c"),
+T(8,14,"A good performance objective is written so that it ____.",["has no precise timetable","is general and not too specific","is almost impossible to accomplish","can be easily measured"],"d"),
+T(8,15,"Which plan guides resource allocation for long-term advancement of the organization's mission?",["Tactical","Operational","Strategic","Functional"],"c"),
+X("The textbook's SMART goals are specific, measurable, ____, relevant, and ____.",["attainable, timely","achievable, time-bound","actionable, tested","agreed, tracked"],0,"The book words it 'attainable' and 'timely'. Note: my earlier PDF guessed 'achievable' and 'time-bound'."),
+B("Ch 2: Taylor's scientific management rests on which tool?",["Time and motion study to find the most efficient way to do a job","Written rules and a formal hierarchy","Unity of command","Hierarchy of needs"],0,"Taylor used time study. The Gilbreths pioneered motion study (bricklayers' output tripled)."),
+B("Ch 2: Fayol's scalar chain principle says ____.",["each person gets orders from only one boss","one person is in charge of all activities with the same objective","there is a clear, unbroken line of communication from top to bottom","authority should be decentralized"],2,"Unity of command = one boss. Unity of direction = one person in charge of activities with the same objective."),
+B("Ch 2: Which is NOT one of Weber's bureaucracy characteristics?",["Clear division of labour","Impersonality","Careers based on merit","Informal rules and flexible roles"],3,"Weber's five: division of labour, hierarchy of authority, formal rules and procedures, impersonality, careers based on merit."),
+B("Ch 2: The three classical approaches share which assumption?",["People are rational and act for personal and monetary gain","People are social and self-actualizing","Every situation needs a different approach","Quality must be improved continuously"],0,"Behavioural approaches assume people are social and self-actualizing."),
+B("Ch 2: Hawthorne effect:",["Workers singled out for special attention perform well, or better than expected","Workers restrict output to match the group","Workers dislike supervision","Pay is the main motivator"],0,"The Hawthorne studies were criticized for poor design, but shifted attention to social and human factors. Elton Mayo led them."),
+B("Ch 2: Maslow's deficit principle says ____.",["a satisfied need does not motivate behaviour","needs are satisfied in any order","self-actualization is satisfied first","a need is active only if the next-higher need is met"],0,"The progression principle: a need becomes active only when the next-lower need is satisfied. At self-actualization neither principle applies; the more it is satisfied, the stronger it grows."),
+B("Ch 2: McGregor said Theory X and Theory Y assumptions create ____.",["self-fulfilling prophecies","quality circles","goal alignment","contingency plans"],0,"Theory X managers get passive, dependent workers. Theory Y managers get initiative and high performance."),
+B("Ch 2: Who is the 'Father of African American Management' with the 'eight necessities'?",["Charles Clinton Spaulding","Frederick Taylor","Chris Argyris","Elton Mayo"],0,"Follett saw organizations as communities. Spaulding led North Carolina Mutual Life Insurance and published the eight necessities in 1927."),
+B("Ch 2: Argyris argued that bureaucratic practices ____.",["are inconsistent with the needs of mature adult personalities","maximize self-actualization","reduce absenteeism","create psychological success"],0,"Absenteeism, turnover, apathy and low morale may signal a mismatch. Treat people as responsible adults."),
+B("Ch 2: Which quantitative tool breaks large projects into sequenced tasks to control timetables?",["Network models","Queuing theory","Linear programming","Inventory analysis"],0,"Queuing theory: checkout waits. Linear programming: allocating production across machines. Inventory analysis: how much to order and when."),
+B("Ch 2: Contingency thinking means ____.",["there is no one best way; match practice to the situation","all organizations should be bureaucracies","quality is the only goal","decisions come from data alone"],0,"Bureaucracy suits stable, predictable environments. Complex, changing situations need flexible structures."),
+B("Ch 2: Deming's quality ideas led to TQM, which stresses ____.",["continuous improvement and doing things right the first time","scientific selection of workers","strict hierarchy","division of labour"],0,"Deming taught the Japanese in 1951. ISO certification is a global stamp of quality approval."),
+B("Ch 2: Evidence-based management uses four sources of information. Which is NOT one?",["Hearsay from competitors","Practitioner expertise and judgment","Evidence from the local context","Perspectives of people affected by the decision"],0,"The fourth source is a critical evaluation of the best available research evidence."),
+B("Ch 2: Kolb's four learning styles are ____.",["accommodator, diverger, converger, assimilator","feeler, thinker, watcher, doer","visual, auditory, reading, kinesthetic","sensor, intuitor, thinker, feeler"],0,"Accommodator learns by doing, diverger by observing, converger by problem solving, assimilator by logical reasoning."),
+B("Ch 8: Which is the correct order of the five planning steps?",["Define objectives; determine where you stand; develop premises about the future; analyze alternatives and make a plan; implement and evaluate","Analyze alternatives; define objectives; implement; evaluate; premises","Develop premises; define objectives; implement; stand; alternatives","Implement; evaluate; define; premises; alternatives"],0),
+B("Ch 8: Covey said good planning makes managers more ____.",["results, priority, advantage and change oriented","cost, quality, speed and service oriented","focused, flexible, fast and fair","specific, measurable, attainable and timely"],0),
+B("Ch 8: Lewis Platt's time-management advice was to be ____.",["ruthless about priorities","a perfectionist","flexible about deadlines","calendar-bound"],0,"Don't become calendar-bound; say no to requests that divert you; separate must-do, should-do, would-like-to-do and no-priority items."),
+B("Ch 8: Jaques found most people comfortably handle a time span of about ____.",["three months","one year","five years","twenty years"],0,"A few handle one year and very rare people handle 20 years."),
+B("Ch 8: Tactical plans are ____.",["developed to implement strategic plans, often as functional plans","the longest-term plans","single-use budgets","made only by top management"],0,"Functional plans: production, financial, facilities, logistics, marketing, human resource."),
+B("Ch 8: A budget is a ____ plan, while policies and procedures are ____ plans.",["single-use, standing","standing, single-use","strategic, tactical","long-term, short-term"],0,"Fixed budget = set amount. Flexible budget varies with activity level. Zero-based budgeting treats each period as brand new."),
+B("Ch 8: Scenario planning is ____.",["a long-term version of contingency planning","a short-term budget","a form of benchmarking","the same as forecasting"],0,"Royal Dutch Shell developed it. Contingency plans contain 'trigger points'."),
+B("Ch 8: Qualitative forecasting uses ____, quantitative forecasting uses ____.",["expert opinion, mathematical models of historical data","surveys, opinions","budgets, scenarios","benchmarks, policies"],0,"Forecasts are planning aids, not substitutes. They rely on human judgment and can be wrong."),
+B("Ch 8: Latham and Seijts distinguish ____.",["learning goals from outcome goals","strategic goals from tactical goals","stretch goals from SMART goals","individual goals from team goals"],0,"Stress, burnout and unethical behaviour follow when stretch outcome goals are set without the resources to succeed (banking and Veterans Affairs scandals)."),
+B("Ch 8: Goal alignment conversations should agree on all EXCEPT ____.",["who gets the bonus","objectives for a time period","plans to accomplish them","standards for measuring them"],0,"The fourth item is procedures for reviewing results. This is MBO, 'old-fashioned good management'."),
+B("Ch 8: Resilient people ____.",["frame adversity as a challenge, not a threat","avoid risk","rely on others to rescue them","wait for conditions to improve"],0),
+B("Ch 5: Which is NOT a market-entry strategy (low investment)?",["Wholly owned subsidiary","Global sourcing","Exporting/importing","Licensing/franchising"],0,"Direct investment strategies: strategic alliances, joint ventures, wholly owned subsidiaries. Greenfield = built from the ground up; or established by acquisition."),
+B("Ch 5: Reshoring means ____.",["moving foreign manufacturing and jobs back home","moving jobs to lower-cost countries","selling in foreign markets","buying foreign-made products"],0,"Reasons: rising foreign labour and transport costs, quality control, stable wages, cheaper energy, PR."),
+B("Ch 5: A joint venture is ____.",["co-ownership by foreign and local partners who pool resources and share risks","full foreign ownership","selling rights to a name","exporting goods"],0,"Foreign direct investment (FDI) is setting up or buying all or part of a business abroad. Insourcing describes FDI that creates local jobs."),
+B("Ch 5: Political-risk analysis is used to ____.",["forecast the probability of disruptive events that threaten foreign investments","negotiate tariffs","audit suppliers","set prices"],0),
+B("Ch 5: WTO members are supposed to give one another ____ status.",["most favoured nation","free trade zone","joint venture","tariff-exempt"],0,"Tariffs are taxes on imports. Non-tariff barriers include quotas and import restrictions. Protectionism favours domestic business."),
+B("Ch 5: NAFTA was renegotiated and renamed ____.",["USMCA","TPP11","APEC","ASEAN"],0,"USMCA took effect in 2020. EU = 27 members. APEC = 21 members. ASEAN = 10. SADC = 16. TPP11 = 11 countries, entered into force Jan 2019."),
+B("Ch 5: A transnational corporation ____.",["does business worldwide without identification with one national home","operates only in its host country","is a joint venture","only exports"],0,"MNEs/MNCs have extensive international operations. The 'Domestic Density Index' rates corporate identity."),
+B("Ch 5: Canada's CFPOA makes it illegal to ____.",["bribe foreign public officials for commercial advantage","import conflict minerals","use sweatshops","form joint ventures"],0,"Corruption = illegal practices for personal business interest. Transparency International tracks it."),
+B("Ch 5: Ethnocentrism is ____.",["a tendency to view one's own culture as superior","the ability to adapt across cultures","confusion in an unfamiliar culture","a loose culture"],0,"Culture shock is confusion and discomfort in an unfamiliar culture. Cultural intelligence (CQ) is the ability to adapt and work well across cultures."),
+B("Ch 5: The stages of culture shock, in order, are ____.",["confusion, small victories, honeymoon, irritation and anger, reality","honeymoon, confusion, anger, reality, small victories","reality, honeymoon, confusion, anger, victories","anger, confusion, honeymoon, victories, reality"],0),
+B("Ch 5: Hall's three 'silent languages' of culture are ____.",["context, time, space","power, risk, gender","harmony, hierarchy, loyalty","perception, relationship, self"],0,"Low-context: words carry the message (Canada, U.S., Germany). High-context: message is in the situation (Thailand, Malaysia). Monochronic = one thing at a time. Polychronic = many at once. Proxemics = use of space."),
+B("Ch 5: In a tight culture (e.g., Korea, Japan, Malaysia) ____.",["social norms are strong and deviations are sanctioned","norms are relaxed","individual expression is expected","conformity varies widely"],0,"Loose cultures: Australia, Brazil, Hungary. Gelfand, Nishii and Raver."),
+B("Ch 5: Hofstede's five dimensions are ____.",["power distance, uncertainty avoidance, individualism-collectivism, masculinity-femininity, time orientation","context, time, space, tightness, looseness","harmony, hierarchy, benevolence, loyalty, learning","perception, relationship, self, task, goal"],0,"Hofstede warned against the ecological fallacy: assuming a cultural value applies equally to all members. The U.S. had the highest individualism score; Japan the highest masculinity score."),
+B("Ch 5: The three pillars of intercultural competency are ____.",["perception management, relationship management, self-management","context, time, space","power, risk, time","awareness, tolerance, adaptation"],0,"Hofstede cautions that many management theories are ethnocentric (North American)."),
+B("Ch 1: The seven organizational trends and Handy's shamrock: which group is NOT in the shamrock organization?",["Top executives","Core staff","Freelancers and contractors","Temporary part-timers"],0,"Handy's shamrock has three leaves: core staff, freelancers/contractors, temporary part-timers."),
+B("Ch 1: Mintzberg's disturbance handler, negotiator, entrepreneur and resource allocator are ____ roles.",["decisional","informational","interpersonal","strategic"],0,"Interpersonal: figurehead, leader, liaison. Informational: monitor, disseminator, spokesperson."),
+B("Ch 7: The Five Vs of big data are ____.",["volume, variety, veracity, velocity, value","volume, validity, vision, value, vector","variety, vision, voice, velocity, value","visibility, volume, validity, velocity, veracity"],0)
+    ]
+  },
+  MTH131: {
+    title: "MTH131 · Sections 1.1–1.5, 2.1–2.4 · closed book, no calculator",
+    qs: [
+["Sample Q1. Which statement is correct?",["y = e^(−2x) is increasing","y = (x + 1)² is even","y = sin(x − π) has period π","y = ln(5x) is decreasing","y = |2x| is even"],4,"|−2x| = |2x|. e^(−2x) decreases, (x+1)² is not symmetric about the y-axis, sin(x−π) has period 2π, ln(5x) increases."],
+["Sample Q2. Line with x-intercept −3, parallel to −4x + 3y − 11 = 0:",["−4x + 3y − 3 = 0","−3x + 4y + 3 = 0","−4x − 3y − 12 = 0","4x − 3y + 12 = 0","−4x − 3y + 12 = 0"],3,"Slope is 4/3. Through (−3, 0): y = (4/3)(x + 3), so 3y = 4x + 12, i.e. 4x − 3y + 12 = 0."],
+["Sample Q3. f(x) = (x−2)² − 3 for x < −1; −5x + 1 for −1 ≤ x ≤ 3; √(12−x) − 11 for x > 3. Find f(8), f(0), f(−3).",["f(8)=97, f(0)=1, f(−3)=√15−11","f(8)=−39, f(0)=√12−11, f(−3)=22","f(8)=33, f(0)=√12−11, f(−3)=17","f(8)=8, f(0)=4, f(−3)=5","f(8)=−9, f(0)=1, f(−3)=22"],4,"f(8) = √4 − 11 = −9. f(0) = 1. f(−3) = (−5)² − 3 = 22."],
+["Sample Q4. sin θ = 5/13 and π/2 ≤ θ ≤ π. Find tan θ.",["5/12","5/(8√3)","−5/12","−5/(8√3)","−13/(8√3)"],2,"Second quadrant: cos θ = −12/13, so tan θ = (5/13)/(−12/13) = −5/12."],
+["Sample Q5. Solve e^(2x) − 5e^(−2x) = 0.",["−(ln 2)/4","−(ln 5)/4","(−ln 2 + ln 5)/4","(ln 5)/4","(ln 2 + ln 5)/4"],3,"e^(2x) = 5e^(−2x), so e^(4x) = 5 and x = (ln 5)/4."],
+["Sample Q6. f(x) = a·e^(bx) with f(0) = 2 and f(1) = 5. Find a and b.",["a=5, b=ln(2/5)","a=5, b=ln(5/2)","a=2, b=ln(2/5)","a=2, b=ln(5/2)","a=2, b=ln 5"],3,"f(0) = a = 2. Then 2e^b = 5, so b = ln(5/2)."],
+["Sample Q7. lim (h→0) [1/(2+h) − 1/2] / h",["0","−1/4","−1/2","1/4","1/2"],1,"The numerator is −h/(2(2+h)). Cancel h: −1/(2(2+h)) → −1/4."],
+["Sample Q8. For what k is f continuous, where f(x) = x² + 1 for x > k and 2x for x ≤ k?",["−1","0","1","2","3"],2,"Match at k: k² + 1 = 2k, so (k−1)² = 0 and k = 1."],
+["Domain of f(x) = √(x + 3)/(x − 2)?",["x ≥ −3","[−3, 2) ∪ (2, ∞)","(−3, 2) ∪ (2, ∞)","x ≠ 2","(−∞, −3] ∪ (2, ∞)"],1,"x + 3 ≥ 0 gives x ≥ −3, and x ≠ 2."],
+["Which function is odd?",["x² + x","x³ − x","x sin x","cos 2x","x³ + 1"],1,"(−x)³ − (−x) = −(x³ − x). x sin x and cos 2x are even; the others are neither."],
+["f(x) = x² − 3x, g(x) = 2x + 1. Find (f∘g)(2) − (g∘f)(2).",["3","10","13","−3","7"],2,"f(g(2)) = f(5) = 10. g(f(2)) = g(−2) = −3. Difference 13."],
+["Line through (1, 2) perpendicular to 2x − 3y = 6:",["3x + 2y − 7 = 0","2x + 3y − 8 = 0","3x − 2y + 1 = 0","2x − 3y + 4 = 0","3x + 2y + 7 = 0"],0,"Given slope 2/3, so use −3/2: y − 2 = −(3/2)(x − 1), which gives 3x + 2y − 7 = 0."],
+["(2, 4) is on y = f(x). Which point is on y = −2f(x − 1) + 3?",["(1, −5)","(3, −5)","(3, 11)","(1, 11)","(3, 5)"],1,"x − 1 shifts right 1, so x = 3. y = −2(4) + 3 = −5."],
+["Evaluate sin(5π/6) + cos(2π/3) + tan(3π/4).",["−1","0","1","1/2","−1/2"],0,"1/2 + (−1/2) + (−1) = −1."],
+["cos θ = −3/5 and π ≤ θ ≤ 3π/2. Find sin 2θ.",["−24/25","24/25","7/25","−7/25","12/25"],1,"sin θ = −4/5 in QIII. sin 2θ = 2(−4/5)(−3/5) = 24/25."],
+["If f(x) = (2x + 1)/(x − 3), then f⁻¹(x) =",["(x − 3)/(2x + 1)","(3x + 1)/(x − 2)","(3x − 1)/(x + 2)","(x + 3)/(2x − 1)","(2x + 1)/(x − 3)"],1,"Swap and solve: x(y − 3) = 2y + 1, so y(x − 2) = 3x + 1."],
+["Solve ln x + ln(x − 2) = ln 3.",["x = −1","x = 3","x = −1 and x = 3","x = 1","x = 5"],1,"x² − 2x − 3 = 0 gives 3 or −1. x = −1 makes the logs undefined."],
+["f(x) = a·e^(bx), f(0) = 3, f(2) = 12. Find b.",["ln 4","ln 2","(ln 3)/2","ln 3","2"],1,"a = 3, e^(2b) = 4, so 2b = ln 4 and b = ln 2."],
+["lim (x→0) (√(x + 4) − 2)/x =",["0","1/4","1/2","1","does not exist"],1,"Multiply by the conjugate: 1/(√(x+4) + 2) → 1/4."],
+["lim (x→1) |x − 1|/(x − 1) =",["1","−1","0","∞","does not exist"],4,"Right side gives 1, left side gives −1."],
+["Which is true for f(x) = (x² − 4)/(x² − x − 2)?",["VAs at x = 2 and x = −1","VA at x = −1 only, hole at x = 2","VA at x = 2 only","VAs at x = −2 and x = 1","no vertical asymptotes"],1,"It simplifies to (x + 2)/(x + 1). The x − 2 factor cancels (hole)."],
+["lim (x→−2⁺) 1/(x + 2) =",["−∞","0","+∞","1","−1"],2,"x + 2 is a small positive number, so 1/(x + 2) → +∞."],
+["For what k is f continuous at 3, where f(x) = (x² − x − 6)/(x − 3) for x ≠ 3 and f(3) = k?",["0","3","5","6","−5"],2,"(x − 3)(x + 2)/(x − 3) = x + 2 → 5, so k = 5."]
+    ]
+  }
+};
+/* Split GMS200 into two tabs and tag every question with its chapter (q[4]). */
+const SL = [1,1,1,7,7,7,7,7,7,7,2,2,2,2,2,2,2,8,8,8,5,5,5,5,5,1,7,7,7,7,2,2,8,8,5,5,5,5,5];
+BANKS.GMS200.qs.forEach((q, k) => { q[4] = SL[k]; });
+const chOf = q => {
+  const m = /^Ch (\d+):/.exec(q[0]) || /Textbook Ch (\d+)/.exec(q[3]);
+  if (m) return +m[1];
+  if (/creativity driver|ETHICS CRITERIA/.test(q[0])) return 7;
+  if (/SMART/.test(q[0])) return 8;
+  if (/Mintzberg|INTERPERSONAL role|INFORMATIONAL role|decisional role/.test(q[0])) return 1;
+  if (/intercultural/.test(q[0])) return 5;
+  return q[4];
+};
+const bookAll = BANKS["GMS200 Textbook"].qs;
+bookAll.forEach(q => { q[4] = chOf(q); });
+const isBook = q => /^Textbook Ch/.test(q[3]);
+const SLIDES = "GMS200 Slides & notes", BOOK = "GMS200 Book self-tests", MIXED = "GMS200 Mixed exam";
+const MTH = BANKS.MTH131, slideQs = BANKS.GMS200.qs;
+const WHY = {"s": [["Efficiency is an input measure: how many resources the work cost, not whether the goal was hit.", "Effectiveness is the output measure: did the work achieve the goal or result?", "Productivity compares outputs to inputs, so it blends both ideas and is not purely output.", "Social capital is the value of a manager's network of relationships, not a performance measure."], ["Line managers directly produce the organization's goods or services; the term is about role, not a single area.", "General managers oversee several or all functional areas, so they are not limited to one.", "Functional managers are responsible for one area of activity such as finance, marketing or HR.", "Administrators manage in public or non-profit organizations; it does not mean single-area."], ["Technical, human and conceptual are Katz's three managerial skills, not Mintzberg's roles.", "Mintzberg's ten roles group into interpersonal, informational and decisional.", "Planning, leading and controlling are management functions.", "Top, middle and supervisory are management levels."], ["Timely is one of the five characteristics of useful information.", "Complete is a characteristic: the information must be sufficient for the decision.", "Understandable is a characteristic: it must be in a form the user can grasp.", "Being inexpensive is not on the list. The five are timely, quality, complete, relevant and understandable."], ["Avoiders ignore information that signals problems or opportunities and do nothing.", "Solvers are reactive: they deal with problems after they show up.", "Seekers are proactive: they look ahead to anticipate problems and opportunities.", "Satisficing is a decision style (accept the first good-enough option), not a way of approaching problems."], ["Non-programmed decisions are for new, unstructured problems with no ready solution.", "Programmed decisions apply a standard past solution to a familiar, structured problem.", "Crisis decisions come from sudden, unexpected events that need fast action.", "Risk is a decision environment, not a type of decision."], ["Certain environments have known outcomes, so there are no probabilities to estimate.", "Risk: outcomes are not certain, but probabilities can be assigned to them.", "Uncertain environments are those where probabilities cannot be assigned with confidence.", "Crisis describes a type of decision situation, not one of the three decision environments."], ["Optimizing means choosing the best of all alternatives, which is the classical model's ideal.", "Satisficing means picking the first alternative that is good enough (behavioural model, Simon).", "Benchmarking compares your performance with others' best practices.", "Framing is how the positive or negative context of a problem shapes the choice."], ["Availability bias means relying on recent or easily recalled information.", "Anchoring means starting from a reference point and adjusting too little from it.", "Escalating commitment is continuing a failing course of action because of what has already been invested.", "A framing error is deciding based on the positive or negative way a problem is presented."], ["Availability bias is deciding from what is most recent or memorable, such as a news story.", "Representativeness bias judges something by how closely it resembles a stereotype or past case.", "Confirmation error seeks out information that supports what you already believe.", "Anchoring starts from an initial reference point and adjusts too little from it."], ["Bureaucracy is Max Weber's contribution.", "Taylor is the father of scientific management: time studies, selection, training, incentives.", "Theory Y is Douglas McGregor's.", "The Hawthorne studies were led by Elton Mayo."], ["Foresight is planning: completing a plan of action for the future.", "Command is leading: selecting, directing and evaluating workers.", "Coordination fits diverse efforts together and shares information.", "Control makes sure things happen according to plan and takes corrective action."], ["A clear hierarchy of authority is a Weber characteristic.", "Formal written rules and procedures are a Weber characteristic.", "Careers based on merit are a Weber characteristic.", "Bureaucracy is impersonal: rules apply uniformly with no preferential treatment, so personal relationships over rules is NOT one."], ["The studies did not show pay is the only motivator; they showed social and human factors mattered.", "The Hawthorne finding was that social setting and human relations raised productivity.", "Physical conditions did not explain the results: output rose whatever was changed.", "Workers responded to attention and a positive social setting, not strict control."], ["Resisting change is a Theory X assumption.", "Preferring to be led is a Theory X assumption.", "Theory Y assumes workers can direct and control themselves and seek responsibility.", "Disliking work is a Theory X assumption."], ["That is the deficit principle: a satisfied need no longer motivates.", "Progression: a need becomes active only once the next-lower need is satisfied.", "Needs are not all active at once; they are met in sequence from the bottom up.", "Self-actualization is the highest need, so it comes last, not first."], ["Contingency thinking matches management practice to the demands of the situation.", "TQM is a commitment to continuous improvement and doing things right the first time.", "Scientific management seeks the one best way to do each job.", "Evidence-based management means deciding from facts and data, not hearsay."], ["Short-term plans cover about one year or less.", "Operational plans are short-term plans that support strategic and tactical plans.", "Long-term plans look three or more years ahead.", "Functional plans are tactical plans for areas such as marketing or production."], ["Policies are standing plans that give broad guidelines for decisions.", "Procedures are standing plans with specific rules for actions.", "A budget is a single-use plan that commits resources to a specific activity or period.", "A scenario is a description of a possible future used in scenario planning."], ["Benchmarking compares your performance with others' best practices.", "Forecasting predicts what will happen; it does not build alternative plans by itself.", "Scenario planning is the long-term version of contingency planning with plans for alternative futures.", "MBO is the goal-alignment process between leader and member, not a planning technique for futures."], ["A wholly owned subsidiary is a direct investment, not a market-entry strategy.", "Licensing and franchising are market-entry strategies: low investment, rights sold to others.", "A joint venture is a direct investment with shared ownership.", "A transnational corporation is a type of firm, not a way of entering a market."], ["A joint venture is co-owned by foreign and local partners.", "A strategic alliance is a cooperative arrangement, not full ownership.", "A licensing agreement lets a foreign firm pay for rights; it does not own the operation.", "A wholly owned subsidiary is fully owned and controlled by the foreign firm."], ["A domestic firm operates mainly in its home country.", "A transnational corporation operates worldwide without identifying with one national home.", "A franchisee buys the right to use another firm's name and methods.", "An exporter sells goods abroad but is still a home-based business."], ["NAFTA (now USMCA) is a trade agreement, not a law about bribery.", "The Corruption of Foreign Public Officials Act makes bribing foreign officials illegal for Canadian firms.", "APEC is a regional economic cooperation group.", "The WTO is the global trade organization that handles disputes."], ["High context is not Canada: in Canada most meaning is in the spoken or written word.", "Canada is a low-context, monochronic culture: say what you mean and do one thing at a time.", "Canada is low-context, not high-context.", "Canada is monochronic, not polychronic."], ["True: productivity relates outputs to the inputs used.", "False would be wrong: productivity is exactly outputs compared with resources used."], ["True would be wrong: data are raw facts; information is data made useful.", "False: data and information are different things."], ["True would be wrong: multidimensional thinking uses both systematic and intuitive thinking.", "False: managers should not avoid intuition; they combine it with systematic thinking."], ["True: the classical model assumes managers make optimizing decisions.", "False would be wrong: that describes the behavioural model's satisficing."], ["True would be wrong: that describes availability bias.", "False: anchoring is adjusting from an initial reference point, not overweighting recent information."], ["True: Taylor's principles include careful selection and training of workers.", "False would be wrong: selecting and training workers is one of Taylor's four principles."], ["True would be wrong: creative and self-directed describes Theory Y.", "False: Theory X assumes workers dislike work and need direction."], ["True: a good contingency plan includes trigger points that say when to activate alternatives.", "False would be wrong: trigger points are a feature of good contingency plans."], ["True would be wrong: operational plans are short-term and specific.", "False: the broadest, whole-organization plans are strategic plans."], ["True: exporting sells local products abroad; importing buys foreign products to sell at home.", "False would be wrong: they are two sides of the same trade."], ["True: a joint venture is co-owned by foreign and local partners who pool resources.", "False would be wrong: co-ownership is the defining feature."], ["True would be wrong: that is ethnocentrism.", "False: culture shock is confusion and discomfort in an unfamiliar culture."], ["True: confusion, small victories, honeymoon, then irritation and anger, then reality.", "False would be wrong: the honeymoon comes before irritation and anger."], ["True: political risk is the potential loss in value of a foreign investment from instability or political change.", "False would be wrong: that is the definition of political risk."]], "b": [["Accounting is a business function, not one of the four management functions.", "Creating is not one of the four functions.", "Innovating is not one of the four functions.", "Organizing is the second function: allocating and arranging resources to accomplish tasks."], ["Turnover is something an effective manager keeps low, not a result to achieve.", "Effectiveness is the performance side already named, so it would repeat the first part.", "Satisfaction: effective managers get high performance and high satisfaction from the people doing the work.", "Stress is not a goal of an effective manager."], ["Efficiency is about resource costs: how much input it took to get the task done.", "Goal specificity is about how clearly goals are stated, not efficiency.", "Quality is part of effectiveness or productivity, not what efficiency measures.", "Quantity is an output measure; efficiency is the input (cost) side."], ["Dependency is not a management term for this requirement.", "Accountability: answering to a higher-level boss for the results of your work team.", "Authority is the right to direct others, not the duty to answer for results.", "Empowerment means giving workers more freedom and responsibility."], ["Productivity is the quantity and quality of work produced, relative to the cost of inputs.", "Cost sits on the input side; the output half is quantity and quality.", "Timeliness is not part of the book's definition.", "Value is not part of the book's definition."], ["Top managers watch the external environment for problems and opportunities and set direction.", "Middle managers coordinate and implement top-level plans.", "Lower-level managers focus on day-to-day operations.", "First-line managers supervise operating employees."], ["A general manager is not the same as an accounting manager, who handles one area.", "Middle and top are levels, not the accounting vs editorial distinction.", "Staff managers advise using technical expertise (accounting); line managers directly produce the goods or services (editorial).", "Senior and junior are not the line-versus-staff distinction."], ["Planning: setting objectives and deadlines, here clarifying targets for the team.", "Delegating is assigning work and authority to others.", "Controlling is measuring results against objectives and correcting.", "Supervising is not one of the four management functions."], ["Governance is how a board directs and oversees an organization.", "Networking is building and maintaining relationships with people who can help implement agendas.", "Authority is the right to direct others' work.", "Entrepreneurship is starting a business or innovating."], ["Human skills are needed at all levels equally, so top managers do not rely more on them.", "Conceptual skills (seeing the big picture) grow in importance at higher levels.", "Decision-making is not one of Katz's three skills.", "Technical skills matter most at lower levels, so top managers rely on them less."], ["Mintzberg found the opposite of a leisurely pace.", "Managers rarely get long blocks of private time; work is fragmented.", "Mintzberg found managers face constant pressure for performance, never fully free of it.", "Managers do not have flexible hours as an advantage."], ["Orders from the top are a decreasing emphasis; trends favour empowerment and collaboration.", "New workplace trends value people as human assets and intellectual capital.", "Teamwork is increasing, not decreasing.", "Work-life balance concerns are growing, not shrinking."], ["Direction and top management reverse the idea: in the upside-down pyramid top management supports.", "Leadership toward organizational goals is not the specific point of the upside-down view.", "Managers provide support so workers can directly serve customers, who sit at the top.", "Agendas and networking are managerial activities, not the pyramid's purpose."], ["Planning would set the daily targets, not compare results to them.", "Agenda setting means setting goals and plans for managerial work.", "Controlling: measuring performance against targets and taking action.", "Delegating is assigning work to others."], ["Monitor is an informational role.", "Figurehead is an interpersonal role (ceremonial duties).", "Entrepreneur is a decisional role.", "Negotiator is a decisional role."], ["Leader is interpersonal.", "Liaison is interpersonal.", "Spokesperson is informational: it passes information to the outside world.", "Resource allocator is decisional."], ["Entrepreneur is a decisional role.", "Disturbance handler is a decisional role.", "Resource allocator is a decisional role.", "Liaison is interpersonal, so it is the one that is NOT decisional."], ["Classical approaches assume people are rational and driven by monetary gain, not complex.", "Neoclassical is not one of the chapter's three approaches.", "Behavioural approaches see people as social and self-actualizing with varying needs.", "Modern foundations focus on analysis, systems and contingency, not this assumption."], ["Weber is the bureaucracy theorist.", "Taylor is the father of scientific management.", "Mintzberg is known for managerial roles.", "Katz is known for managerial skills."], ["Division of labour is about clear jobs, not treating people by ID number.", "Merit-based careers is about promotion by ability.", "Rules and procedures is about written guidelines; the key feature here is impersonal treatment.", "Impersonality: everyone is treated by the same rules, which is meant to ensure fairness."], ["Fayol stressed the management duties of planning, organizing, commanding, coordinating and controlling.", "Teaching workers efficient methods is Taylor's focus.", "Promoting the most competent is Weber's merit principle.", "Corporate social responsibility is a later concern, not Fayol's."], ["Time and motion studies to raise efficiency are modern scientific management.", "Finding alternatives to bureaucracy comes from contingency thinking.", "Understanding worker attitudes comes from the behavioural approaches.", "Focusing on teams over individual jobs is a behavioural or modern idea."], ["Structures were not what Hawthorne highlighted.", "Human factors such as attitudes, relationships and group dynamics influence productivity.", "Physical conditions did not explain the results: output rose regardless of changes.", "Pay and rewards were found not to be the whole story."], ["Scientific management: study the job, select and train workers, link pay to performance.", "Contingency thinking says there is no one best way.", "Fayol's advice is about management duties and principles.", "Maslow's work is on human needs."], ["Safety needs are the second level.", "Esteem needs are the fourth level.", "Self-actualization is the highest level: fulfilling your potential.", "Physiological needs are the lowest level."], ["Argyris argued that treating employees as responsible adults gets the best performance.", "Deming is the quality management figure.", "Weber's bureaucracy treats people impersonally by rules.", "Fuller is not a theorist from this chapter."], ["The Hawthorne effect is the tendency to perform as the situation's expectations suggest.", "The systems view sees organizations as interrelated parts.", "Contingency thinking matches methods to situations.", "The open-systems view is about interaction with the environment."], ["A bureaucracy is a structure of rules and hierarchy, not an environment-focused view.", "A closed system does not interact with its environment, so resources and customers would not matter.", "An open system interacts with its environment: it acquires resources and serves customers.", "A pyramid describes hierarchy, not environment interaction."], ["A department is a subsystem: a part of the larger organization working toward common goals.", "A closed system has no environment interaction; a bank department is part of an open system.", "Resource inputs are things like money and people entering the system, not a department.", "A cost centre is an accounting concept, not the systems term used here."], ["Systems thinking views organizations as interacting parts.", "Theory X assumes workers dislike work and need control.", "Motion study reduces a job to its basic physical motions.", "Contingency thinking: fit the approach to each person and situation."], ["Follett is linked with organizations as communities, not analytics.", "McGregor is Theory X and Y; motion study is Taylor and the Gilbreths.", "Deming is the quality management pioneer.", "Theory X and Y belong to McGregor; Maslow is the hierarchy of needs."], ["Continuous improvement is the TQM idea of always seeking better practices.", "Evidence-based management means making decisions on facts rather than hearsay.", "TQM is about quality and customer needs.", "Theory X is a manager's view of workers."], ["Reducing political risk is not a typical reason; international business often increases it.", "Reducing protectionism is not something a company can do alone.", "Reducing labour costs is one of the main reasons firms go global.", "Most favoured nation status is a treatment countries give each other, not a company goal."], ["Importing and exporting does not involve owning a company abroad.", "Licensing sells rights; it does not give ownership.", "A foreign subsidiary is a local operation completely owned and controlled by the foreign firm.", "A joint venture is co-owned with a local partner."], ["Exporting is a market-entry strategy with low investment.", "A joint venture involves capital commitment and shared ownership: direct investment.", "Licensing is a market-entry strategy.", "Global sourcing is a market-entry strategy."], ["Exchange rates are set by markets and monetary policy, not WTO disputes.", "Ethnocentrism is a cultural attitude, not a trade dispute.", "Nationalization is a government taking assets; not the WTO's typical case.", "The WTO promotes free trade and resolves disputes about tariffs and trade restrictions."], ["Differences in legal environments include intellectual property rules, which these complaints show.", "Political stability is a different risk type.", "Sustainable development is about environmental and social goals.", "Economic systems refer to how an economy is organized."], ["Monochronic cultures do one thing at a time; polychronic cultures do many things at once.", "Polycentric and geocentric are management orientation terms, not Hall's time terms.", "Collectivist and individualist are Hofstede's values dimension.", "Neutral and affective relate to emotional expression."], ["Monochronic describes use of time.", "Proxemic describes use of space.", "Collectivist describes group values (Hofstede).", "Low-context cultures put meaning in written or spoken words."], ["Uncertainty avoidance and feminism: the question describes teamwork and authority, not these.", "Universalism and particularism are not Hofstede's dimensions.", "Collectivism (teamwork) and high power distance (respect for authority).", "Long-term orientation and masculinity do not match the description."], ["Canada ranks among the most individualistic, behind only the US and Australia.", "Collectivist is the opposite of Canada's profile.", "Feminine does not describe Canada's standing.", "Canada is a bit more long-term than the US but this is not the standout finding."], ["Universalist is not the term for judging others' customs inferior.", "Prescriptive is not the relevant term.", "Monochronic is about time.", "Ethnocentrism is viewing your own culture as superior."], ["Licensing sells rights to use technology or a trademark.", "Importing is buying foreign-made products to sell at home.", "A joint venture is a co-owned business.", "Global sourcing is purchasing materials, components and services from around the world."], ["Transnationals try to operate worldwide without strong ties to one national home.", "Doing business in only one or two foreign countries describes a small international firm.", "Ethnocentric leadership is not what defines transnationals.", "Being based outside North America is not the distinction."], ["The Act does not ban joint ventures abroad.", "The Act restricts Canadians bribing foreign officials, not foreign firms bribing Canadians.", "Canadian businesses cannot make payoffs to foreign public officials to gain contracts.", "Intellectual property theft is a separate legal issue."], ["Monochronic is a time orientation, not a tightness trait.", "Low-context is about communication style.", "Tight cultures have strong norms and sanction deviations: members defer and avoid standing out.", "Loose cultures tolerate deviation and encourage standing out."], ["Low masculinity concerns valuing relationships over assertiveness.", "Particularism is not a Hofstede dimension.", "High power distance: people accept unequal power and respect age, status and authority.", "Monochronic is about time use."], ["Perception management is one of the three pillars with relationship management and self-management.", "Risk management is not an intercultural pillar.", "Quality management is not an intercultural pillar.", "Time management is not an intercultural pillar."], ["Information technology does not eliminate top managers.", "IT increases the information available to decision makers.", "IT breaks down barriers within and between organizations and with the outside world.", "IT increases the need for awareness of the environment."], ["Analytics is the systematic analysis of large data sets.", "Business intelligence mines the available data and reports it in the most useful way for decision makers.", "Anchoring and adjustment is a judgmental heuristic.", "Optimizing is a decision-making model."], ["Problem seekers anticipate problems before they occur.", "Avoiders ignore problems.", "Solvers are reactive: they work on problems after they occur.", "Problem manager is not one of the three approaches."], ["Systematic thinkers approach problems in a rational, analytic way.", "Intuitive thinkers use feelings and hunches and process in a flexible, holistic way.", "Internal is not a thinking style in this chapter.", "External is not a thinking style in this chapter."], ["Sensation thinkers like hard facts, clear goals, control and impersonal settings.", "Intuitive thinkers prefer broad ideas and possibilities.", "Sensation feelers favour personal, harmonious relationships.", "Intuitive feelers like openness and innovation."], ["Certainty means outcomes are known so no probabilities are needed.", "Optimizing is a decision model, not an environment.", "Risk: probabilities can be assigned to alternatives and outcomes.", "Satisficing is a decision style, not an environment."], ["Identifying alternatives is step 2.", "Evaluating results is the last step.", "Finding and defining the problem is step 1.", "Choosing a solution comes after alternatives are evaluated."], ["Routine problems are familiar and structured.", "Unstructured problems are novel and need nonprogrammed decisions, like an international sales plan.", "A crisis is sudden and unexpected.", "Structured problems are familiar and routine."], ["Ethical soundness is one of the book's five criteria, along with benefits, costs, timeliness and acceptability.", "Competitiveness is not one of the five criteria.", "Availability is not one of the criteria.", "Simplicity is not one of the criteria."], ["Not the typical mistake named in the text for crisis situations.", "Not the typical mistake named in the text for crisis situations.", "Managers in a crisis often isolate themselves rather than seek help and input.", "Not the typical mistake named in the text for crisis situations."], ["Behavioural and human relations are not the matched pair.", "The classical model optimizes; the behavioural model satisfices.", "Heuristic and humanistic are not decision models in this chapter.", "Quantitative is not the optimizing model."], ["A framing error is deciding based on how the problem is presented.", "Escalating commitment is continuing a failing course of action.", "Anchoring and adjustment: salary is the anchor and the raise adjusts too little from it.", "Strategic opportunism is staying flexible to exploit opportunities."], ["Framing error: responding to the positive or negative context of a problem.", "Escalating commitment is continuing a failing course.", "Availability and adjustment is not the right term (availability bias and anchoring and adjustment are separate).", "Strategic opportunism is flexibility about opportunities."], ["Strategic opportunism is staying focused on long-term objectives while remaining flexible.", "Escalating commitment is continuing a course of action even though the facts show it is failing.", "Confirmation error is seeking only information that supports your view.", "The risky shift is a group decision phenomenon, not this one."], ["Emotional intelligence is a general competency, not one of the three creativity drivers.", "Management support is a situational driver.", "Organizational culture is a situational driver.", "Task motivation is a personal creativity driver."], ["Task expertise is a personal driver.", "Group creativity skills are a situational driver (team level).", "Individual creativity skills are a personal driver.", "Task motivation is a personal driver."], ["Utility, rights, justice and caring are the book's four ethics criteria.", "Family, community and role models are the book's spotlight questions, and peers is not one.", "Benefits, costs, timeliness and acceptability are criteria for evaluating alternatives.", "Technical, human and conceptual are Katz's skills."], ["Developing premises is one step of the planning process, not its definition.", "Measuring results and corrective action describe controlling.", "Measuring past performance is not planning's definition.", "Planning is setting objectives and deciding how to accomplish them."], ["Improved focus and flexibility are core benefits of planning.", "Lower labour costs are not a direct planning benefit.", "Planning does not guarantee more accurate forecasts.", "Higher profits are not a guaranteed benefit."], ["A functional plan shows how a department contributes to strategy: here, the marketing plan.", "Single-use plans are budgets and projects.", "Production plans are one type of functional plan, not the marketing department's plan.", "Zero-based is a budgeting method."], ["Zero-based budgeting starts each period from scratch.", "Participative planning involves those affected.", "Strategic plans are broad and long-term.", "Contingency planning identifies alternative actions if circumstances change."], ["Measuring actual performance comes after standards.", "Establishing objectives and standards is first so results can be measured.", "Comparing results to objectives is the second or third step.", "Corrective action is the last step."], ["Policies are not long-term plans by definition.", "Single-use plans are budgets, not policies.", "Policies are standing plans, used again and again.", "Operational is the wider category; the specific type is standing."], ["Zero-based budgeting justifies the new budget from scratch based on projected activities.", "Variable budgeting is not the term.", "Fixed budgets allocate a set amount.", "Contingency is a type of planning, not of budgeting."], ["Participatory planning takes more time.", "It does not reduce the need for forecasting.", "The benefit is not greater attention to contingencies.", "Participation builds commitment to carrying out the plan."], ["Lower-level objectives are the means to achieve higher-level objectives (ends).", "The ends are the higher-level objectives.", "Scenarios are possible futures.", "Benchmarks are comparison standards."], ["Flexible budgets vary with activity levels.", "Benchmarking identifies best practices used by others.", "Forecasting seeks accurate predictions.", "Benchmarking does not focus on the short term."], ["A communication gap between staff planners and line managers can lead to plans with poor information and low commitment.", "Staff planners are experts, so lack of expertise is not the problem.", "Staff planners are not necessarily short-term.", "Neglect of budgets is not the issue."], ["Identifying future conditions is only a step.", "Setting stretch goals is only a step.", "Planning is only complete when plans are implemented and results are evaluated.", "Budgets commit resources but do not finish the process."], ["The team member alone would not align with organizational goals.", "The leader alone leaves out the member's input.", "Under MBO leader and member jointly set objectives.", "A lawyer is not part of the MBO process."], ["No precise timetable would make it unmeasurable; good objectives have deadlines.", "Good objectives are specific, not general.", "They should be challenging but attainable.", "Good objectives are measurable, so results are unambiguous."], ["Tactical plans implement strategy at lower levels.", "Operational plans guide short-term activity.", "Strategic plans guide resource allocation for long-term advancement of the mission.", "Functional plans are tactical plans for areas."], ["Attainable, timely: the book's wording for the fourth and fifth SMART criteria.", "Achievable and time-bound is a common alternative wording, not the book's.", "Actionable and tested is not SMART.", "Agreed and tracked is not SMART."], ["Written rules and a formal hierarchy are Weber's bureaucracy, not Taylor's tool.", "Unity of command is one of Fayol's principles.", "Hierarchy of needs is Maslow's.", "Taylor used time and motion study to find the most efficient way to do each job."], ["Unity of command means each person gets orders from only one boss.", "Unity of direction means one person is in charge of all activities with the same objective.", "Scalar chain: a clear, unbroken line of communication from the top to the bottom of the organization.", "Decentralizing authority is not the scalar chain principle."], ["Informal rules and flexible roles are the opposite of Weber's ideal, so this is the one that is NOT a characteristic.", "Clear division of labour is a Weber characteristic.", "Impersonality is a Weber characteristic.", "Careers based on merit are a Weber characteristic."], ["Fitting the approach to each situation is contingency thinking, a modern approach.", "Continuous quality improvement is the TQM idea.", "The classical approaches (Taylor, Fayol, Weber) assume people are rational and act for personal and monetary gain.", "People being social and self-actualizing is the behavioural assumption."], ["Restricting output to avoid upsetting the group was a Hawthorne finding but is not the Hawthorne effect.", "Disliking supervision is not the effect.", "Pay as the main motivator is the classical view, which Hawthorne questioned.", "The Hawthorne effect: workers singled out for special attention perform well, even better than expected."], ["Deficit principle: a satisfied need does not motivate behaviour; people act on deprived needs.", "Needs are met in a sequence, not any order (that is the progression principle).", "Self-actualization is the highest need, reached last.", "That reverses the progression principle: a need becomes active only when the next-LOWER need is satisfied."], ["Contingency plans are not what McGregor's assumptions create.", "Theory X and Y assumptions become self-fulfilling prophecies: managers' behaviour leads workers to confirm the expectations.", "Quality circles are not related to the theory.", "Goal alignment is a planning concept."], ["Chris Argyris wrote about adult personality and organizations.", "Elton Mayo led the Hawthorne studies.", "Charles Clinton Spaulding, with the eight necessities of management.", "Taylor is the father of scientific management."], ["Argyris argued practices block self-actualization, the opposite of maximizing it.", "Mismatch tends to cause absenteeism and turnover rather than reduce them.", "Treating workers as dependent creates psychological failure, not success.", "Argyris: traditional bureaucratic practices conflict with the needs of mature adults."], ["Network models break projects into sequenced tasks so schedules can be planned and controlled.", "Queuing theory manages waiting lines such as checkouts.", "Linear programming allocates production across machines or resources.", "Inventory analysis decides how much to order and when."], ["Decisions from data alone is not contingency thinking.", "Contingency thinking: there is no one best way; match practice to the situation.", "Bureaucracy is only one possible structure and fits stable environments.", "Quality is not the only goal in contingency thinking."], ["Strict hierarchy is Weber's bureaucracy.", "Division of labour is a classical idea.", "TQM stresses continuous improvement and getting things right the first time.", "Scientific selection of workers is Taylor."], ["Practitioner expertise and judgment is one of the four sources.", "Evidence from the local context is a source.", "Perspectives of the people affected is a source.", "Hearsay is exactly what evidence-based management tries to avoid; the fourth real source is the best available research."], ["Accommodator, diverger, converger and assimilator are Kolb's four learning styles.", "Feeler, thinker, watcher and doer are axes behind the styles, not their names.", "Visual, auditory, reading and kinesthetic is a different model.", "Sensor, intuitor, thinker and feeler describe cognitive styles from Chapter 7."], ["That order starts with implementing, which cannot come before planning.", "Correct order: define objectives, assess where you stand, develop premises, analyze alternatives and plan, implement and evaluate.", "Alternatives are analyzed only after objectives and premises.", "Premises come after objectives and the assessment of where you stand."], ["Focused, flexible, fast and fair is not Covey's list.", "Specific, measurable, attainable and timely are SMART criteria.", "Covey: results oriented, priority oriented, advantage oriented and change oriented.", "Cost, quality, speed and service oriented is not Covey's list."], ["Perfectionism is not Platt's advice.", "Flexible deadlines is not his advice.", "Being calendar-bound is what he warned against.", "Platt said he was ruthless about priorities."], ["Jaques found most people work comfortably with about a three-month time span.", "A one-year span is comfortable for only a smaller group.", "Five years is not one of Jaques's spans.", "Twenty years is possible for only very rare people."], ["Strategic plans are made by top management; tactical plans are made at middle and lower levels.", "Tactical plans implement strategic plans, often as functional plans.", "The longest-term plans are strategic.", "Single-use budgets are operational plans."], ["Strategic and tactical are not the budget versus policy distinction.", "Long-term and short-term is not that distinction.", "A budget is a single-use plan; policies and procedures are standing plans.", "That reverses it: policies and procedures are standing, budgets single-use."], ["A short-term budget is not scenario planning.", "Benchmarking compares with best practices.", "Forecasting predicts; scenario planning builds plans for several possible futures.", "Scenario planning is a long-term version of contingency planning."], ["Qualitative forecasting uses expert opinion; quantitative uses math models and statistics on historical data.", "Surveys feed quantitative forecasts, so this pair is wrong.", "Budgets and scenarios are not forecasting types.", "Benchmarks and policies are not forecasting types."], ["Individual versus team goals is not Latham and Seijts's point.", "They distinguish learning goals (knowledge and skills) from outcome goals (performance targets).", "Strategic versus tactical is not their distinction.", "Stretch versus SMART is not their distinction."], ["Plans to accomplish objectives is part of the agreement.", "Standards for measuring is part of the agreement.", "Who gets the bonus is not part of goal alignment conversations, so it is the EXCEPT.", "Objectives for a time period is part of the agreement."], ["Resilient people do not avoid risk.", "They do not rely on others to rescue them.", "They do not wait for conditions to improve.", "Resilient people frame adversity as a challenge and bounce back."], ["A wholly owned subsidiary is direct investment, not low-investment market entry.", "Global sourcing is a market-entry strategy.", "Exporting and importing is market entry.", "Licensing and franchising is market entry."], ["Buying foreign-made products is importing.", "Reshoring is moving foreign manufacturing and jobs back home.", "Moving jobs to lower-cost countries is offshoring.", "Selling in foreign markets is exporting."], ["Selling rights to a name describes licensing or franchising.", "Exporting is selling locally made goods abroad.", "A joint venture is co-ownership by foreign and local partners who pool resources and share risks.", "Full foreign ownership is a wholly owned subsidiary."], ["Negotiating tariffs is for governments and the WTO.", "Auditing suppliers is a separate tool.", "Political-risk analysis is not about pricing.", "Political-risk analysis forecasts the probability of disruptive events threatening foreign investments."], ["Most favoured nation status: the most favourable treatment WTO members give each other's imports and exports.", "A free trade zone is a regional alliance outcome, not WTO status.", "A joint venture is a business arrangement.", "Tariff-exempt is not the status."], ["ASEAN is the ten-nation Southeast Asian group.", "NAFTA became the United States-Mexico-Canada Agreement (USMCA) in 2020.", "TPP11 is a different trade agreement.", "APEC is the Asia Pacific Economic Cooperation forum."], ["A joint venture is co-owned and not what defines a transnational.", "Exporting only does not define a transnational.", "A transnational does business worldwide without identifying with one national home.", "Operating only in its host country is not transnational."], ["Importing conflict minerals is not the CFPOA; conflict minerals law is Dodd-Frank in the US.", "Sweatshops are not what the CFPOA targets.", "Forming joint ventures is legal.", "The CFPOA makes bribing foreign public officials for commercial advantage illegal."], ["Ethnocentrism: viewing your own culture as superior.", "The ability to adapt across cultures is cultural intelligence (CQ).", "Confusion in an unfamiliar culture is culture shock.", "A loose culture has relaxed norms."], ["Anger does not come first.", "Order: confusion, small victories, honeymoon, irritation and anger, reality.", "The honeymoon is not the first stage.", "Reality is the last stage, not the first."], ["Harmony, hierarchy and loyalty are Confucian values.", "Perception, relationship and self-management are intercultural competency pillars.", "Hall's silent languages are context, time and space.", "Power, risk and gender are not Hall's."], ["Relaxed norms describe loose cultures.", "Individual expression being expected describes loose cultures.", "Conformity that varies widely describes loose cultures.", "In tight cultures social norms are strong and deviations are sanctioned."], ["Hofstede's five: power distance, uncertainty avoidance, individualism-collectivism, masculinity-femininity, time orientation.", "Context, time and space are Hall's; tightness and looseness are Gelfand's.", "Harmony, hierarchy, benevolence, loyalty and learning are Confucian values.", "Perception, relationship and self-management are competency pillars."], ["Awareness, tolerance and adaptation is not the book's list.", "The three pillars are perception management, relationship management and self-management.", "Context, time and space are Hall's silent languages.", "Power, risk and time are not the pillars."], ["Freelancers and contractors are one leaf of the shamrock.", "Temporary part-timers are one leaf.", "Top executives are not a leaf, so they are the one NOT in the shamrock.", "Core staff are one leaf."], ["Informational roles are monitor, disseminator and spokesperson.", "Interpersonal roles are figurehead, leader and liaison.", "Strategic is not one of Mintzberg's role groups.", "Entrepreneur, disturbance handler, resource allocator and negotiator are decisional roles."], ["The Five Vs: volume, variety, veracity, velocity, value.", "Validity, vision and vector are not among the Vs.", "Voice and vision are not among the Vs.", "Visibility and validity are not among the Vs."]], "m": [["e^(−2x) is decreasing, not increasing.", "(x + 1)² is symmetric about x = −1, not the y-axis, so it is not even.", "sin(x − π) has period 2π, not π.", "ln(5x) is increasing.", "|−2x| = |2x|, so the function is even."], ["Slope 4/3 is right but the x-intercept is −3/4, not −3.", "Slope 3/4 is wrong.", "x-intercept −3 is right but the slope is −4/3, not 4/3.", "Slope 4/3 and at y = 0 gives x = −3: both conditions hold.", "Slope −4/3 is wrong and the x-intercept is 3."], ["f(8) = 97 and f(−3) = √15 − 11 use the wrong pieces.", "f(8) = −39 and f(0) = √12 − 11 use the wrong pieces.", "f(8) = 33 uses the first piece, but 8 > 3 so the third piece applies.", "These values do not follow from any piece.", "f(8) = √4 − 11 = −9, f(0) = −5(0) + 1 = 1, f(−3) = (−5)² − 3 = 22."], ["The sign is wrong: in quadrant II tangent is negative.", "This value does not follow from sin and cos in quadrant II.", "cos θ = −12/13 in quadrant II, so tan θ = (5/13)/(−12/13) = −5/12.", "This value does not follow from the triangle.", "This value does not follow from the triangle."], ["That would come from e^(4x) = 1/2, which is not what the equation gives.", "That would come from e^(4x) = 1/5, flipping the ratio.", "ln 5 − ln 2 over 4 arises from dividing the wrong way around.", "e^(2x) = 5e^(−2x) gives e^(4x) = 5, so x = (ln 5)/4.", "(ln 2 + ln 5)/4 = (ln 10)/4, which does not match e^(4x) = 5."], ["f(0) = a = 2, so a cannot be 5.", "f(0) = a = 2, so a cannot be 5.", "a = 2 is right but the ratio is inverted: e^b = 5/2, not 2/5.", "a = 2 and 2e^b = 5 gives b = ln(5/2).", "e^b = 5/2, so b = ln(5/2), not ln 5."], ["The numerator goes to 0 but so does h; this is 0/0, not 0.", "1/(2+h) − 1/2 = −h/(2(2+h)); dividing by h gives −1/(2(2+h)) → −1/4.", "That drops the factor of 2 in the denominator.", "The sign is wrong; the fraction is negative.", "The sign and the factor are both wrong."], ["k = −1 gives 2 on the left and −2 on the right.", "k = 0 gives 1 versus 0.", "k² + 1 = 2k gives (k − 1)² = 0, so k = 1.", "k = 2 gives 5 versus 4.", "k = 3 gives 10 versus 6."], ["That forgets x ≠ 2.", "Need x + 3 ≥ 0, so x ≥ −3, and x ≠ 2.", "−3 is allowed since √0 = 0 is defined.", "That forgets the square root restriction.", "That reverses the inequality."], ["x² + x is neither odd nor even.", "(−x)³ − (−x) = −(x³ − x), so it is odd.", "x sin x is even (odd times odd).", "cos 2x is even.", "x³ + 1 is neither."], ["That is not f(g(2)) − g(f(2)).", "10 is only f(g(2)); you forgot to subtract.", "f(g(2)) = f(5) = 10 and g(f(2)) = g(−2) = −3, so the difference is 13.", "−3 is only g(f(2)).", "10 − (−3) is 13, not 7."], ["Slope −3/2 through (1, 2) gives 3x + 2y = 7.", "Passes through (1, 2) but slope −2/3 is the negative, not the negative reciprocal.", "Passes through (1, 2) but slope 3/2 has the wrong sign.", "Passes through (1, 2) but slope 2/3 is parallel, not perpendicular.", "Slope is right but the line does not pass through (1, 2)."], ["x − 1 shifts right 1, so x = 3, not 1.", "x = 2 + 1 = 3 and y = −2(4) + 3 = −5.", "The y-value uses +2 instead of −2.", "Both coordinates are wrong.", "The y-value does not follow from −2(4) + 3."], ["sin(5π/6) = 1/2, cos(2π/3) = −1/2, tan(3π/4) = −1: total −1.", "tan(3π/4) is −1, not 0.", "tan(3π/4) is −1, not +1.", "The last two terms do not cancel to 0; tan contributes −1.", "tan(3π/4) = −1 is missing."], ["The sign is wrong: sin θ = −4/5 in quadrant III, so the product is positive.", "sin 2θ = 2 sin θ cos θ = 2(−4/5)(−3/5) = 24/25.", "7/25 is not sin 2θ.", "−7/25 is cos 2θ, not sin 2θ.", "That drops the factor 2."], ["That is 1/f(x), not the inverse.", "Swap and solve: x(y − 3) = 2y + 1, so y = (3x + 1)/(x − 2).", "Sign errors in the algebra.", "Roles of numerator terms swapped.", "That is f itself."], ["x = −1 makes ln x undefined.", "x(x − 2) = 3 gives 3 or −1, and −1 is rejected, so x = 3.", "Both roots listed, but −1 is not in the domain.", "x = 1 gives x(x − 2) = −1.", "x = 5 gives 15, not 3."], ["ln 4 equals 2b, not b.", "a = 3 and e^(2b) = 4, so 2b = ln 4 and b = ln 2.", "That uses the wrong ratio.", "That uses a instead of the ratio.", "b is a number found from the exponent, not 2."], ["The numerator goes to 0, but so does the denominator.", "Multiply by the conjugate: 1/(√(x+4) + 2) → 1/4.", "That would be a factor error in the conjugate step.", "That would be a factor error in the conjugate step.", "It is 0/0, which can be resolved to a value."], ["1 is only the right-hand limit.", "−1 is only the left-hand limit.", "The one-sided limits are not 0.", "The limit does not go to infinity.", "The right side gives 1 and the left side −1, so the limit does not exist."], ["x = 2 cancels, so it is a hole, not an asymptote.", "(x + 2)/(x + 1) after cancelling: vertical asymptote at −1 and a hole at 2.", "The factor x − 2 cancels.", "Those values are not zeros of the denominator.", "The denominator zero at x = −1 does not cancel."], ["−∞ is the limit from the left.", "The limit does not go to 0.", "From the right x + 2 is a small positive number, so 1/(x + 2) → +∞.", "The limit is not 1.", "The limit is not −1."], ["The limit is not 0.", "3 is the x-value, not the limit.", "(x − 3)(x + 2)/(x − 3) = x + 2 → 5, so k = 5.", "The limit is 5, not 6.", "The sign is wrong."]]};
+slideQs.forEach((q, k) => { q[5] = WHY.s[k]; });
+bookAll.forEach((q, k) => { q[5] = WHY.b[k]; });
+MTH.qs.forEach((q, k) => { q[5] = WHY.m[k]; });
+Object.keys(BANKS).forEach(k => delete BANKS[k]);
+BANKS[SLIDES] = { chaps: true, title: "GMS200 · written from your lecture slides and my reading of the chapters · Ch 1, 7, 2, 8, 5", qs: slideQs.concat(bookAll.filter(q => !isBook(q))) };
+BANKS[BOOK] = { chaps: true, title: "GMS200 · Management, 5th Canadian ed. · the book's own end-of-chapter self-test questions, publisher answer key", qs: bookAll.filter(isBook) };
+BANKS[MIXED] = { mixed: true, chaps: false, title: "GMS200 · a 70-question exam drawn evenly from every chapter, mixing slide, note and book questions", qs: BANKS[SLIDES].qs.concat(BANKS[BOOK].qs) };
+BANKS.MTH131 = MTH;
+const CHAPS = [1, 7, 2, 8, 5];
+const LS = "midterm-drill";
+let course = SLIDES, chap = 0, order = [], i = 0, score = 0, missed = [], answered = false;
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+try { const s = localStorage.getItem(LS); if (s && BANKS[s]) course = s; } catch (e) {}
+
+function shuffle(a){ for (let k=a.length-1;k>0;k--){ const j=Math.floor(Math.random()*(k+1)); [a[k],a[j]]=[a[j],a[k]]; } return a; }
+const fmt = s => Math.floor(s/60) + ":" + String(s % 60).padStart(2, "0");
+const EXAM = {
+  [SLIDES]: { n: 70, mins: 60, note: "Midterm format: 70 MC/TF in 60 minutes." },
+  [BOOK]: { n: 70, mins: 60, note: "Midterm format: 70 MC/TF in 60 minutes." },
+  [MIXED]: { n: 70, mins: 60, note: "Midterm format: 70 MC/TF in 60 minutes, 14 from each chapter." },
+  MTH131: { n: 8, mins: 35, note: "The real exam is 90 minutes with about 8 MC and 5 long answers. This MC-only timer is my estimate, so treat it as a guide." }
+};
+const SIZES = [["full", 1, "Full"], ["half", .5, "Half"], ["quarter", .25, "Quarter"]];
+let mode = "practice", size = "full", timer = null, deadline = 0, t0 = 0, isRetry = false, live = false, picks = {}, limitSecs = 0, phase = "run";
+let tmode = "all", showTable = false, confirmClear = false;
+try { if (localStorage.getItem(LS + "-mode") === "timed") mode = "timed"; } catch (e) {}
+const HK = LS + "-history";
+let H = [];
+try { H = JSON.parse(localStorage.getItem(HK)) || []; } catch (e) { H = []; }
+function saveH(){ try { localStorage.setItem(HK, JSON.stringify(H.slice(-300))); } catch (e) {} }
+
+const rng = seed => () => (seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296;
+let mixRandom = true;
+try { mixRandom = localStorage.getItem(LS + "-rnd") !== "0"; } catch (e) {}
+function mixedDraw(){
+  const qs = BANKS[course].qs, rand = mixRandom ? Math.random : rng(20261027), by = {};
+  qs.forEach((q, k) => (by[q[4]] = by[q[4]] || []).push(k));
+  const sh = a => { for (let k = a.length - 1; k > 0; k--) { const j = Math.floor(rand() * (k + 1)); [a[k], a[j]] = [a[j], a[k]]; } return a; };
+  const per = CHAPS.map(c => sh((by[c] || []).slice()).slice(0, 14)), out = [];
+  for (let r = 0; r < 14; r++) per.forEach(p => { if (p[r] !== undefined) out.push(p[r]); });
+  if (mixRandom) sh(out);
+  return out;
+}
+function poolIdx(){ const qs = BANKS[course].qs; return qs.map((_, k) => k).filter(k => !chap || qs[k][4] === chap); }
+function plan(f){
+  const ex = EXAM[course], pool = poolIdx();
+  const base = Math.min(ex.n, pool.length), count = Math.max(1, Math.min(pool.length, Math.round(base * f)));
+  return { pool, base, count, secs: base === ex.n ? Math.round(ex.mins * 60 * f) : Math.round(count * ex.mins * 60 / ex.n) };
+}
+let pending = null;
+function hideGuard(){ pending = null; $("guard").hidden = true; }
+function guard(fn, revert){
+  if (live && phase === "run") {
+    pending = { fn, revert };
+    const g = $("guard"); g.hidden = false;
+    g.innerHTML = `<strong>Leave this timed quiz?</strong><span>The clock is still running. Leaving ends this attempt and it will not be saved.</span><div class="row"><button class="btn" type="button" id="g-stay">Keep going</button><button class="btn ghost" type="button" id="g-leave">Leave quiz</button></div>`;
+    $("g-stay").onclick = () => { const r = pending && pending.revert; hideGuard(); if (r) r(); };
+    $("g-leave").onclick = () => { const f = pending && pending.fn; hideGuard(); if (f) f(); };
+    $("g-stay").focus(); g.scrollIntoView({ block: "nearest" });
+    return;
+  }
+  fn();
+}
+function stopTimer(){ if (timer) { clearInterval(timer); timer = null; } }
+function start(list){
+  stopTimer(); hideGuard(); isRetry = !!list; live = false; picks = {}; i = 0; score = 0; missed = []; answered = false; limitSecs = 0;
+  if (list) { order = list.slice(); if ($("shuf").checked) shuffle(order); phase = "run"; t0 = Date.now(); return render(); }
+  if (mode === "timed") { phase = "ready"; order = []; return render(); }
+  order = BANKS[course].mixed ? mixedDraw() : poolIdx();
+  if (!BANKS[course].mixed && $("shuf").checked) shuffle(order);
+  phase = "run"; t0 = Date.now(); render();
+}
+function begin(){
+  const p = plan(SIZES.find(s => s[0] === size)[1]);
+  if (!p.count) return;
+  order = BANKS[course].mixed ? mixedDraw().slice(0, p.count) : shuffle(p.pool.slice()).slice(0, p.count);
+  limitSecs = p.secs; live = true;
+  i = 0; score = 0; missed = []; picks = {}; answered = false;
+  t0 = Date.now(); deadline = t0 + p.secs * 1000; phase = "run";
+  timer = setInterval(tick, 250); render();
+}
+function tick(){
+  const r = Math.ceil((deadline - Date.now()) / 1000), c = $("clock");
+  if (c) { c.textContent = fmt(Math.max(0, r)); c.classList.toggle("low", r <= 60); }
+  if (r <= 0) done(true);
+}
+function tabs(){
+  $("tabs").innerHTML = Object.keys(BANKS).map(k => `<button class="tab" type="button" data-c="${k}" aria-pressed="${k===course}">${k}</button>`).join("");
+  $("tabs").querySelectorAll("button").forEach(b => b.onclick = () => guard(() => {
+    course = b.dataset.c; chap = 0; try { localStorage.setItem(LS, course); } catch (e) {} confirmClear = false; tabs(); start();
+  }));
+  const bank = BANKS[course];
+  $("shufl").hidden = !!bank.mixed; $("rndl").hidden = !bank.mixed; $("rnd").checked = mixRandom;
+  $("chaps").hidden = !bank.chaps;
+  if (bank.chaps) {
+    const n = c => bank.qs.filter(q => !c || q[4] === c).length;
+    $("chaps").innerHTML = [0].concat(CHAPS).map(c => `<button class="tab chip" type="button" data-ch="${c}" aria-pressed="${c===chap}">${c ? "Ch " + c : "All chapters"}</button>`).join("");
+    $("chaps").querySelectorAll("button").forEach(b => b.onclick = () => guard(() => { chap = +b.dataset.ch; tabs(); start(); }));
+  }
+  $("modes").innerHTML = [["practice", "Practice · instant feedback"], ["timed", "Timed quiz"]].map(m => `<button class="tab" type="button" data-m="${m[0]}" aria-pressed="${m[0]===mode}">${m[1]}</button>`).join("");
+  $("modes").querySelectorAll("button").forEach(b => b.onclick = () => guard(() => { mode = b.dataset.m; try { localStorage.setItem(LS + "-mode", mode); } catch (e) {} tabs(); start(); }));
+  $("sizes").hidden = mode !== "timed";
+  if (mode === "timed") {
+    $("sizes").innerHTML = SIZES.map(s => { const p = plan(s[1]); return `<button class="tab chip" type="button" data-s="${s[0]}" aria-pressed="${s[0]===size}">${s[2]} · ${p.count} Qs · ${fmt(p.secs)}</button>`; }).join("");
+    $("sizes").querySelectorAll("button").forEach(b => b.onclick = () => guard(() => { size = b.dataset.s; tabs(); start(); }));
+  }
+  trend();
+}
+function ready(){
+  const p = plan(SIZES.find(s => s[0] === size)[1]), ex = EXAM[course];
+  $("app").innerHTML = `
+    <div class="card">
+      <span class="tag">Timed quiz</span>
+      <p class="score">${fmt(p.secs)}</p>
+      <p style="margin:0">${p.count} questions${chap ? " from Chapter " + chap : ""}, ${BANKS[course].mixed && !mixRandom ? "the same fixed set every attempt." : "drawn at random."} ${esc(ex.note)}</p>
+      <p class="foot" style="margin:0">Each answer shows right or wrong straight away, and the clock keeps running while you read. Skipped questions count as missed. When time runs out the quiz ends and scores what you have.${p.base < ex.n ? " This pool has only " + p.base + " questions, so the sizes and time are scaled down at the real per-question pace." : ""}</p>
+      <div class="row"><button class="btn" type="button" id="go">Start the clock</button></div>
+    </div>`;
+  $("go").onclick = begin;
+}
+function render(){
+  const bank = BANKS[course], total = order.length;
+  $("foot").textContent = bank.title;
+  if (phase === "ready") return ready();
+  if (i >= total) return done();
+  const q = bank.qs[order[i]], L = "ABCDE";
+  const right = live ? `<span id="clock" class="clock">${fmt(Math.max(0, Math.ceil((deadline - Date.now()) / 1000)))}</span>` : `<span></span>`;
+  $("app").innerHTML = `
+    <div class="meta"><span>Question ${i+1} of ${total}</span>${right}</div>
+    <div class="bar"><i style="width:${(i/total)*100}%"></i></div>
+    <div class="card">
+      ${q[4] ? `<span class="tag">Chapter ${q[4]}</span>` : ""}
+      <p class="q">${esc(q[0])}</p>
+      <div class="opts">${q[1].map((o,k)=>`<button class="opt" type="button" data-k="${k}"><b>${L[k]}</b><span>${esc(o)}</span></button>`).join("")}</div>
+      <div id="fb" aria-live="polite"></div>
+      <div class="row" id="next" hidden><button class="btn" type="button" id="nb">${i+1===total?"See results":"Next question"}</button></div>
+    </div>`;
+  answered = false;
+  $("app").querySelectorAll(".opt").forEach(b => b.onclick = () => live ? choose(+b.dataset.k) : pick(+b.dataset.k, q));
+  if (live) {
+    $("next").hidden = false; label();
+    $("nb").onclick = () => { i++; render(); };
+    tick();
+  }
+}
+function whyHtml(q, k){
+  if (!q[5]) return "";
+  return `<ul class="why">${q[1].map((o, idx) => `<li class="${idx === q[2] ? "r" : (idx === k ? "w" : "")}"><b>${"ABCDE"[idx]} ${idx === q[2] ? "✓" : "✗"}</b> ${esc(q[5][idx])}</li>`).join("")}</ul>`;
+}
+function label(){ $("nb").textContent = (picks[i] === undefined ? "Skip" : (i + 1 === order.length ? "Finish" : "Next question")); }
+function choose(k){
+  if (answered) return; answered = true; picks[i] = k;
+  const q = BANKS[course].qs[order[i]], ok = k === q[2];
+  document.querySelectorAll(".opt").forEach((b, idx) => {
+    b.disabled = true;
+    if (idx === q[2]) b.classList.add("right"); else if (idx === k) b.classList.add("wrong");
+  });
+  $("fb").innerHTML = `<div class="fb ${ok?"ok":"no"}"><strong>${ok?"Correct":"Not quite. Answer: "+"ABCDE"[q[2]]}</strong>${esc(q[3])}${whyHtml(q, k)}</div>`;
+  label();
+}
+function pick(k, q){
+  if (answered) return; answered = true;
+  const ok = k === q[2];
+  if (ok) score++; else missed.push(order[i]);
+  document.querySelectorAll(".opt").forEach((b, idx) => {
+    b.disabled = true;
+    if (idx === q[2]) b.classList.add("right"); else if (idx === k) b.classList.add("wrong");
+  });
+  $("fb").innerHTML = `<div class="fb ${ok?"ok":"no"}"><strong>${ok?"Correct":"Not quite. Answer: "+"ABCDE"[q[2]]}</strong>${esc(q[3])}${whyHtml(q, k)}</div>`;
+  $("next").hidden = false; $("nb").focus();
+  $("nb").onclick = () => { i++; render(); };
+}
+function done(expired){
+  const wasLive = live; stopTimer(); hideGuard(); live = false;
+  const bank = BANKS[course], total = order.length;
+  if (wasLive) { score = 0; missed = []; order.forEach((qi, j) => { if (picks[j] === bank.qs[qi][2]) score++; else missed.push(qi); }); }
+  const secs = Math.round(Math.min(Date.now() - t0, wasLive ? limitSecs * 1000 : Infinity) / 1000);
+  const pct = total ? Math.round(score / total * 100) : 0;
+  const skipped = wasLive ? total - Object.keys(picks).length : 0;
+  if (wasLive && !isRetry && total) {
+    H.push({ ts: Date.now(), set: course, chap, mode: wasLive ? "timed" : "practice", size: wasLive ? size : "", n: total, score, secs, limit: wasLive ? limitSecs : 0 });
+    saveH();
+  }
+  phase = "done";
+  $("app").innerHTML = `
+    <div class="bar"><i style="width:100%"></i></div>
+    <div class="card">
+      <span class="tag">${course}${chap ? " · Ch " + chap : ""} · ${expired ? "time's up" : "finished"}</span>
+      <p class="score">${score}/${total} <span style="font-size:1.1rem;color:var(--muted)">${pct}%</span></p>
+      ${wasLive ? `<p class="foot" style="margin:0">Time ${fmt(secs)} of ${fmt(limitSecs)}${skipped ? " · " + skipped + " unanswered" : ""}</p>` : ""}
+      ${missed.length ? `<div><strong>Review what you missed (${missed.length})</strong>
+        <ul class="missed">${missed.map(n => { const q = bank.qs[n]; return `<li>${esc(q[0])}<br><em>${"ABCDE"[q[2]]}. ${esc(q[1][q[2]])}</em> · ${esc(q[3])}</li>`; }).join("")}</ul></div>` : `<p>No misses. Try a shuffled rerun.</p>`}
+      <div class="row">
+        ${missed.length ? `<button class="btn" type="button" id="rm">Retry missed only</button>` : ""}
+        <button class="btn ghost" type="button" id="ra">${mode === "timed" ? "Back to timed setup" : "Restart all"}</button>
+      </div>
+    </div>`;
+  if ($("rm")) $("rm").onclick = () => start(missed.slice());
+  $("ra").onclick = () => start();
+  trend();
+}
+
+/* ---- trend ---- */
+const dstr = ts => { const d = new Date(ts); return d.toLocaleDateString(undefined, { month: "short", day: "numeric" }) + " " + d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }); };
+const tok = k => getComputedStyle(document.documentElement).getPropertyValue(k).trim();
+function chart(rows, key, title, unit, max0, ticks, color, aria){
+  const cLine = tok("--line"), cMut = tok("--muted"), cSur = tok("--surface");
+  color = tok(color.slice(4, -1));
+  const N = rows.length, W = 600, Hh = 170, Lm = 40, Rm = 14, Tm = 12, Bm = 26;
+  const vals = rows.map(r => r[key]);
+  const ymax = max0 || Math.max(10, Math.ceil(Math.max.apply(null, vals) / 10) * 10);
+  const X = k => N === 1 ? (Lm + W - Rm) / 2 : Lm + k * (W - Lm - Rm) / (N - 1);
+  const Y = v => Tm + (1 - v / ymax) * (Hh - Tm - Bm);
+  const ty = max0 ? ticks : [0, ymax / 2, ymax];
+  const grid = ty.map(t => `<line x1="${Lm}" x2="${W-Rm}" y1="${Y(t)}" y2="${Y(t)}" stroke="${cLine}" stroke-width="1"/><text x="${Lm-6}" y="${Y(t)+4}" text-anchor="end" fill="${cMut}" class="ax">${Math.round(t)}${unit}</text>`).join("");
+  const step = Math.ceil(N / 7);
+  const xl = rows.map((r, k) => (k % step === 0 || k === N - 1) ? `<text x="${X(k)}" y="${Hh-8}" text-anchor="middle" fill="${cMut}" class="ax">${r.n}</text>` : "").join("");
+  const path = N > 1 ? `<polyline fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="${rows.map((r, k) => X(k) + "," + Y(r[key])).join(" ")}"/>` : "";
+  const dots = rows.map((r, k) => r.mode === "timed"
+    ? `<circle cx="${X(k)}" cy="${Y(r[key])}" r="5" fill="${color}" stroke="${cSur}" stroke-width="2"/>`
+    : `<circle cx="${X(k)}" cy="${Y(r[key])}" r="4.5" fill="${cSur}" stroke="${color}" stroke-width="2"/>`).join("");
+  return `<figure class="fig"><figcaption>${title}</figcaption>
+    <div class="cw" data-key="${key}"><svg viewBox="0 0 ${W} ${Hh}" role="img" aria-label="${esc(aria)}">${grid}${xl}<text x="${(Lm+W-Rm)/2}" y="${Hh}" text-anchor="middle" class="ax" style="display:none"></text>${path}${dots}<line stroke="${cMut}" class="xh" y1="${Tm}" y2="${Hh-Bm}" x1="0" x2="0" style="display:none"/></svg><div class="tip" hidden></div></div></figure>`;
+}
+function trend(){
+  $("trendbox").hidden = mode !== "timed";
+  const all = H.filter(h => h.set === course && h.mode === "timed");
+  const rows = all.map((h, k) => ({ n: k + 1, h, mode: h.mode, pct: Math.round(h.score / h.n * 100), spq: Math.round(h.secs / h.n * 10) / 10 }));
+  let body;
+  if (!rows.length) {
+    body = `<p class="foot">Finish a timed quiz on this set and its score and time will show up here.</p>`;
+  } else {
+    const last5 = rows.slice(-5), avg = a => a.reduce((s, r) => s + r, 0) / a.length;
+    const stats = `<div class="stats"><div><b>${rows.length}</b><span>attempts</span></div><div><b>${Math.max.apply(null, rows.map(r => r.pct))}%</b><span>best</span></div><div><b>${Math.round(avg(last5.map(r => r.pct)))}%</b><span>last ${last5.length} avg</span></div><div><b>${Math.round(avg(last5.map(r => r.spq)))}s</b><span>per question, last ${last5.length}</span></div></div>`;
+    const tbl = `<div class="tw"><table><thead><tr><th>#</th><th>When</th><th>Mode</th><th>Score</th><th>Time</th><th>s/Q</th></tr></thead><tbody>${rows.map(r => `<tr><td>${r.n}</td><td>${dstr(r.h.ts)}</td><td>${r.mode === "timed" ? "Timed " + r.h.size : "Practice"}${r.h.chap ? " · Ch " + r.h.chap : ""}</td><td>${r.h.score}/${r.h.n} (${r.pct}%)</td><td>${fmt(r.h.secs)}${r.h.limit ? " / " + fmt(r.h.limit) : ""}</td><td>${r.spq}</td></tr>`).join("")}</tbody></table></div>`;
+    body = stats + (showTable ? tbl : chart(rows, "pct", "Score by attempt (%)", "%", 100, [0, 50, 100], "var(--accent)", "Line chart of score percent across " + rows.length + " attempts") + chart(rows, "spq", "Time per question by attempt (seconds)", "s", 0, null, "var(--timec)", "Line chart of seconds per question across " + rows.length + " attempts") + `<p class="foot">Hover or tap a point for details.</p>`);
+  }
+  $("trend").innerHTML = `<div class="th"><span class="foot">Timed quizzes on this set</span><div class="row"><button class="tab chip" type="button" id="t-tbl" aria-pressed="${showTable}">Table</button></div></div>
+    ${body}
+    ${H.length ? (confirmClear ? `<div class="row"><span class="foot">Delete all saved attempts for every set?</span><button class="btn ghost" type="button" id="c-yes">Yes, clear</button><button class="btn ghost" type="button" id="c-no">Cancel</button></div>` : `<div class="row"><button class="btn ghost" type="button" id="c-ask">Clear history</button><span class="foot">Saved in this browser only.</span></div>`) : ""}`;
+  $("t-tbl").onclick = () => { showTable = !showTable; trend(); };
+  if ($("c-ask")) $("c-ask").onclick = () => { confirmClear = true; trend(); };
+  if ($("c-no")) $("c-no").onclick = () => { confirmClear = false; trend(); };
+  if ($("c-yes")) $("c-yes").onclick = () => { H = []; saveH(); confirmClear = false; trend(); };
+  document.querySelectorAll(".cw").forEach(cw => {
+    const key = cw.dataset.key, svg = cw.querySelector("svg"), tip = cw.querySelector(".tip"), xh = cw.querySelector(".xh"), N = rows.length;
+    const vb = svg.viewBox.baseVal, Lm = 40, Rm = 14;
+    const X = k => N === 1 ? (Lm + vb.width - Rm) / 2 : Lm + k * (vb.width - Lm - Rm) / (N - 1);
+    const move = e => {
+      const r = svg.getBoundingClientRect(), x = (e.clientX - r.left) * vb.width / r.width;
+      let k = N === 1 ? 0 : Math.round((x - Lm) / ((vb.width - Lm - Rm) / (N - 1)));
+      k = Math.max(0, Math.min(N - 1, k));
+      const row = rows[k], h = row.h;
+      xh.setAttribute("x1", X(k)); xh.setAttribute("x2", X(k)); xh.style.display = "";
+      tip.hidden = false;
+      tip.innerHTML = `<b>Attempt ${row.n}</b> · ${dstr(h.ts)}<br>${h.mode === "timed" ? "Timed " + h.size : "Practice"}${h.chap ? " · Ch " + h.chap : ""}<br>${h.score}/${h.n} (${row.pct}%) · ${fmt(h.secs)}${h.limit ? " of " + fmt(h.limit) : ""} · ${row.spq}s per question`;
+      const px = X(k) / vb.width * r.width;
+      tip.style.left = Math.max(0, Math.min(r.width - tip.offsetWidth, px - tip.offsetWidth / 2)) + "px";
+    };
+    svg.addEventListener("pointermove", move); svg.addEventListener("pointerdown", move);
+    svg.addEventListener("pointerleave", () => { tip.hidden = true; xh.style.display = "none"; });
+  });
+}
+$("restart").onclick = () => guard(() => start());
+$("shuf").onchange = () => guard(() => start(), () => { $("shuf").checked = !$("shuf").checked; });
+$("rnd").onchange = () => guard(() => { mixRandom = $("rnd").checked; try { localStorage.setItem(LS + "-rnd", mixRandom ? "1" : "0"); } catch (e) {} start(); }, () => { $("rnd").checked = !$("rnd").checked; });
+tabs(); start();
+</script>
+</body>
+</html>
